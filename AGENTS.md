@@ -244,6 +244,27 @@ Live catalog exposure must stay distinct from MiMoCode validation claims:
 - update the validation proof ledger when a model gains or loses
   MiMoCode-specific validation status
 
+Release Please must stay driven by releasable Conventional Commits:
+
+- release-please runs on pushes to `main` and opens/updates a release PR only
+  when commits since the latest `v*.*.*` tag contain a releasable Conventional
+  Commit such as `feat:`, `fix:`, `perf:`, or a breaking-change marker
+- when merging a user-visible behavior change that should produce a release PR,
+  make the final merge/squash commit subject a releasable Conventional Commit
+- plain subjects such as `Refactor installer runtime...` are valid git commits
+  but are release-please no-ops; do not expect a release PR from them
+- after merging to `main`, verify the `Release Please` workflow run for that
+  push before assuming the release PR was created
+- if the workflow succeeds but no release PR appears, inspect
+  `rtk git log <latest-v-tag>..origin/main --format='%h %s'` for missing
+  releasable Conventional Commit subjects
+- if a releasable change already landed on `main` with a non-releasable subject,
+  repair it with a minimal empty Conventional Commit on `main`, for example
+  `rtk git commit --allow-empty -m "feat: fetch GonkaGate model catalog from /v1/models"`
+- let release-please own version bumps, `CHANGELOG.md`,
+  `.release-please-manifest.json`, and configured extra files instead of
+  editing release artifacts manually during normal release flow
+
 ## Validation
 
 Current local validation baseline:
