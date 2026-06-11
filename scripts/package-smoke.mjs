@@ -38,14 +38,7 @@ try {
   mkdirSync(installRoot, { recursive: true });
   run(
     "npm",
-    [
-      "install",
-      "--offline",
-      "--ignore-scripts",
-      "--no-audit",
-      "--fund=false",
-      tarball,
-    ],
+    ["install", "--ignore-scripts", "--no-audit", "--fund=false", tarball],
     { cwd: installRoot },
   );
 
