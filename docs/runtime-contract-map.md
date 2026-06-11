@@ -1,0 +1,43 @@
+# Runtime Contract Map
+
+This file maps the scaffold-to-runtime truth flip so implementation work cannot
+silently drift away from public docs or contract tests.
+
+## Truth Flip Files
+
+When setup behavior changes from scaffold-only to implemented runtime behavior,
+update these surfaces together:
+
+- `AGENTS.md` - repository truth, product/security invariants, implementation
+  status, validation baseline, supported setup behavior, and validation command.
+- `README.md` - public status, npm entrypoint, runtime flow, supported flags,
+  config targets, current model-validation status, and local development checks.
+- `docs/how-it-works.md` - runtime architecture, scope behavior, config-layer
+  precedence, verification flow, and migration path.
+- `docs/security.md` - safe secret intake, managed storage, redaction, project
+  commit-safety, and blocked unsafe override behavior.
+- `docs/model-validation.md` - candidate versus validated model truth and the
+  proof checklist required before public picker exposure.
+- `docs/troubleshooting.md` - user-facing blocker taxonomy without asking users
+  to paste raw `mimo --pure debug config` output.
+- `CHANGELOG.md` - meaningful user-facing runtime changes.
+- `src/constants/contract.ts` - package identity, public implementation status,
+  MiMoCode baseline, and curated registry publication state.
+- `src/constants/models.ts` - candidate/validated model registry truth.
+- `test/docs-contract.test.ts` and `test/package-contract.test.ts` - docs,
+  constants, package metadata, and model registry agreement.
+- `test/cli.test.ts` - human and JSON CLI output semantics.
+
+## Scaffold Guard
+
+Until a runtime behavior has implementation, tests, docs, and contract truth in
+agreement, public docs must not claim shipped setup success. Runtime internals
+may exist before public success is possible, but docs must say exactly what can
+and cannot complete.
+
+## Runtime Guard
+
+After runtime modules exist, docs must not keep claiming that `src/install/`
+does not exist. If a model is promoted to MiMoCode-validated, docs, runtime
+constants, validation records, CLI output, tests, and package contract metadata
+must all name the same public setup behavior.

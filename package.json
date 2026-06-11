@@ -1,0 +1,68 @@
+{
+  "name": "@gonkagate/mimo-code-setup",
+  "version": "0.1.0",
+  "description": "Onboarding CLI runtime for configuring MiMoCode to use GonkaGate as a custom provider.",
+  "homepage": "https://github.com/GonkaGate/mimo-code-setup#readme",
+  "bugs": {
+    "url": "https://github.com/GonkaGate/mimo-code-setup/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GonkaGate/mimo-code-setup.git"
+  },
+  "type": "module",
+  "bin": {
+    "mimo-code-setup": "bin/gonkagate-mimo-code.js",
+    "gonkagate-mimo-code": "bin/gonkagate-mimo-code.js"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "docs",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsx src/cli.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "package:smoke": "node scripts/package-smoke.mjs",
+    "package:check": "npm run build && publint && npm run package:smoke",
+    "prepack": "npm run ci",
+    "test": "npm run build && node scripts/run-tests.mjs",
+    "typecheck": "tsc -p tsconfig.json",
+    "ci": "npm run typecheck && npm run test && npm run format:check && npm run package:check"
+  },
+  "engines": {
+    "node": ">=22.14.0"
+  },
+  "keywords": [
+    "gonkagate",
+    "mimocode",
+    "mimo",
+    "installer",
+    "cli",
+    "custom provider",
+    "openai compatible"
+  ],
+  "license": "Apache-2.0",
+  "packageManager": "npm@11.11.1",
+  "devDependencies": {
+    "@types/node": "^24.6.1",
+    "@types/semver": "^7.7.1",
+    "@types/write-file-atomic": "^4.0.3",
+    "prettier": "^3.6.2",
+    "publint": "^0.3.15",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^8.3.2",
+    "commander": "^14.0.3",
+    "jsonc-parser": "^3.3.1",
+    "semver": "^7.7.3",
+    "write-file-atomic": "^7.0.1"
+  }
+}
