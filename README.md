@@ -50,10 +50,10 @@ npx @gonkagate/mimo-code-setup
 The happy path is:
 
 1. The CLI checks that `mimo` is installed and supported.
-2. It selects a MiMoCode-validated GonkaGate model.
-3. It asks whether GonkaGate should be activated for `user` or `project`
+2. It asks for your GonkaGate API key in a hidden prompt.
+3. It calls `GET /v1/models` and offers every model returned by GonkaGate.
+4. It asks whether GonkaGate should be activated for `user` or `project`
    scope.
-4. It asks for your GonkaGate API key in a hidden prompt.
 5. It writes the managed config, verifies the result, and tells you to go back
    to plain `mimo`.
 
@@ -106,9 +106,11 @@ npx @gonkagate/mimo-code-setup
 Under the hood, the shipped runtime:
 
 - validates local `mimo`
-- resolves the validated model and activation scope
 - accepts the secret only through a hidden prompt, `GONKAGATE_API_KEY`, or
   `--api-key-stdin`
+- fetches the live GonkaGate model catalog from
+  `https://api.gonkagate.com/v1/models`
+- resolves the selected model and activation scope
 - writes only the minimum safe MiMoCode config layers
 - verifies the durable plain-`mimo` outcome and the current session's effective
   MiMoCode outcome
@@ -165,28 +167,22 @@ rely on inherited per-user ACLs instead of portable `chmod`-style enforcement.
 
 ## Current Product Truth
 
-The current validated MiMoCode model is:
-
-- `moonshotai/kimi-k2.6`
-
-The curated registry also carries candidate entries for future gated MiMoCode
-proof:
-
-- `minimaxai/minimax-m2.7`
-- `qwen/qwen3-235b-a22b-instruct-2507-fp8`
-
-The runtime is curated-model-first:
+The runtime is live-catalog-first:
 
 - the stable provider id is `gonkagate`
 - the managed user-level provider key is `provider.gonkagate`
 - the canonical base URL is `https://api.gonkagate.com/v1`
+- the setup model list is fetched from
+  `https://api.gonkagate.com/v1/models` after safe API-key intake
 - the current provider package is `@ai-sdk/openai-compatible`
 - the current transport target is `chat_completions`
 - future migration should add `responses` support without renaming the product
 - the selected setup model remains the activation default through `model` and
   `small_model`
-- the curated registry can carry compatibility metadata, provider options,
-  model options, and headers when a validated MiMoCode flow needs them
+- `provider.gonkagate.models` is generated from every model returned by
+  `/v1/models`
+- `docs/model-validation.md` tracks MiMoCode workflow proof separately from
+  live catalog availability
 
 ## Verification And Config Precedence
 
@@ -195,11 +191,11 @@ Success is based on effective MiMoCode config.
 
 For durable verification, `mimo --pure debug config` is the final truth source.
 The installer uses that resolved result to verify `model`, `small_model`,
-`provider.gonkagate`, the validated transport and base URL shape, and the
-validated model catalog shape.
+`provider.gonkagate`, the current transport and base URL shape, and the live
+model catalog shape.
 
 The installer also runs `mimo models gonkagate` and checks that the selected
-validated GonkaGate model is visible to MiMoCode.
+GonkaGate model is visible to MiMoCode.
 
 MiMoCode override state matters here:
 
@@ -244,6 +240,14 @@ inside the current user's profile and rely on inherited per-user ACLs instead
 of portable `chmod`-style enforcement.
 
 WSL remains supported too.
+
+## Development Checks
+
+Before treating setup behavior, docs, or package changes as ready, run:
+
+```bash
+npm run ci
+```
 
 ## Docs
 

@@ -94,7 +94,7 @@ test("CLI wrapper exposes the package version", () => {
   assert.equal(versionResult.stdout.trim(), CONTRACT_METADATA.cliVersion);
 });
 
-test("default CLI run reaches secret intake with the validated public registry", async () => {
+test("default CLI run reaches secret intake before live model catalog fetch", async () => {
   const deps = createTestDeps();
   deps.setCwd(`${deps.root}/project`);
   deps.setEnv({ HOME: `${deps.root}/home` });
@@ -121,7 +121,7 @@ test("default CLI run reaches secret intake with the validated public registry",
   }
 });
 
-test("--json reports structured validated-registry setup blockers", async () => {
+test("--json reports structured setup blockers before live model catalog fetch", async () => {
   const deps = createTestDeps();
   deps.setCwd(`${deps.root}/project`);
   deps.setEnv({ HOME: `${deps.root}/home` });
@@ -167,7 +167,7 @@ test("CLI parser rejects plain --api-key before secret handling", () => {
   );
 });
 
-test("CLI can render JSON success and human Next command with injected validated registry", async () => {
+test("CLI can render JSON success and human Next command with injected registry", async () => {
   const deps = createTestDeps();
   deps.setCwd(`${deps.root}/project`);
   deps.setEnv({ HOME: `${deps.root}/home` });

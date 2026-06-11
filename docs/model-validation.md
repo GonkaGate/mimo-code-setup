@@ -1,18 +1,21 @@
 # Model Validation
 
-The current curated registry has one MiMoCode-validated public model:
-`moonshotai/kimi-k2.6`.
+The runtime setup picker is populated from GonkaGate `GET /v1/models` after
+safe API-key intake. This document is not the public picker allowlist; it is
+the MiMoCode workflow proof ledger.
 
-Validated entries:
+Current MiMoCode-validated workflow proof exists for:
 
-- `moonshotai/kimi-k2.6` - Kimi K2.6, 262K context, recommended default.
+- `moonshotai/kimi-k2.6` - Kimi K2.6, 262K context.
 
-Candidate entries are refreshed from the public GonkaGate models page. GonkaGate
-availability metadata is not MiMoCode validation proof.
+The current public GonkaGate models page also lists:
 
 - `minimaxai/minimax-m2.7` - MiniMax M2.7, 205K context.
 - `qwen/qwen3-235b-a22b-instruct-2507-fp8` - Qwen3 235B A22B
   Instruct 2507 FP8, 262K context.
+
+GonkaGate `/v1/models` availability is setup-catalog proof, not full MiMoCode
+workflow validation proof.
 
 Live MiMoCode validation for Kimi uses the full GonkaGate slug as the MiMoCode
 model key, so the effective model ref is
@@ -23,8 +26,8 @@ The managed provider config sets `provider.gonkagate.options.setCacheKey` to
 `false`. Live GonkaGate chat-completions requests reject the non-standard
 `promptCacheKey` parameter emitted when AI SDK cache keys are enabled.
 
-Before a model can become public validated runtime behavior, validation must
-prove:
+Before a model can be documented as MiMoCode workflow-validated, validation
+must prove:
 
 - MiMoCode TUI startup with the selected model active
 - `mimo run` with the selected model
@@ -45,7 +48,8 @@ prove:
 - a dry or fixture-backed chat path uses `@ai-sdk/openai-compatible`
 - effective config verification detects wrong base URL, wrong transport, and
   provider gating blockers
-- docs and tests name the model as validated only after the proof exists
+- docs and tests name the model as MiMoCode workflow-validated only after the
+  proof exists
 
 The registry types already allow transport, adapter package, provider options,
 model options, model headers, limits, and migration metadata so MiMoCode-specific
@@ -53,5 +57,5 @@ requirements can be added without changing the public shape later.
 
 Validation records are represented in `src/constants/model-validation.ts`.
 Contract tests reject any registry entry marked `validated` without a matching
-record. Additional live GonkaGate proof is a gated validation activity and is
-not part of default CI.
+record. Additional live GonkaGate workflow proof is a gated validation activity
+and is not part of default CI.

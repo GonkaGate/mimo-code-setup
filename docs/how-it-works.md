@@ -2,9 +2,9 @@
 
 `mimo-code-setup` configures MiMoCode to use GonkaGate as a custom provider.
 The current repository contains the product contract and installer runtime.
-`moonshotai/kimi-k2.6` is the current MiMoCode-validated public default;
-additional GonkaGate models remain gated until their own validation records
-exist.
+The public model picker is populated from GonkaGate `GET /v1/models` after
+safe API-key intake, so it follows the live GonkaGate model catalog instead of
+a hardcoded allowlist.
 
 ## Planned Flow
 
@@ -14,10 +14,12 @@ exist.
    files.
 3. Collect a GonkaGate API key through safe inputs only:
    `GONKAGATE_API_KEY`, hidden interactive prompt, or `--api-key-stdin`.
-4. Store the secret under `~/.gonkagate/mimo-code/api-key`.
-5. Write user-level provider config for `provider.gonkagate`.
-6. Write only activation settings for project scope.
-7. Verify durable config and current-session effective config without printing
+4. Fetch `https://api.gonkagate.com/v1/models` with Bearer auth and build the
+   setup picker from every returned model id.
+5. Store the secret under `~/.gonkagate/mimo-code/api-key`.
+6. Write user-level provider config for `provider.gonkagate`.
+7. Write only activation settings for project scope.
+8. Verify durable config and current-session effective config without printing
    raw resolved config.
 
 ## MiMoCode Surfaces
@@ -62,9 +64,16 @@ The intended managed provider shape is:
       },
       "models": {
         "moonshotai/kimi-k2.6": {
-          "name": "Kimi K2.6",
+          "name": "moonshotai/kimi-k2.6",
           "limit": {
-            "context": 262000,
+            "context": 0,
+            "output": 0
+          }
+        },
+        "minimaxai/minimax-m2.7": {
+          "name": "minimaxai/minimax-m2.7",
+          "limit": {
+            "context": 0,
             "output": 0
           }
         }
@@ -73,6 +82,10 @@ The intended managed provider shape is:
   }
 }
 ```
+
+The concrete `models` object is generated from the live `/v1/models` response.
+The API model ids are also the MiMoCode model keys under
+`provider.gonkagate.models`.
 
 `setCacheKey` is disabled because live GonkaGate chat-completions requests
 reject the non-standard `promptCacheKey` parameter emitted by the AI SDK when

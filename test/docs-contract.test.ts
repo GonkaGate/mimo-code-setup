@@ -18,15 +18,14 @@ test("README documents the scaffold honestly", () => {
     /@gonkagate\/mimo-code-setup/,
     /npx @gonkagate\/mimo-code-setup/,
     /MiMoCode/,
-    /public CLI entrypoint calls the installer runtime/,
-    /moonshotai\/kimi-k2\.6/,
-    /recommended public default/,
-    /provider id: `gonkagate`/,
+    /the shipped runtime/i,
+    /GET \/v1\/models/,
+    /live-catalog-first/,
+    /stable provider id is `gonkagate`/,
     new RegExp(escapeRegExp(GONKAGATE_BASE_URL)),
     new RegExp(escapeRegExp(MANAGED_SECRET_FILE_REF)),
     /npm run ci/,
   ]);
-  assert.doesNotMatch(readme, /shipped runtime/i);
   assert.doesNotMatch(readme, /candidate-only registry blocks setup/i);
 });
 
@@ -39,7 +38,7 @@ test("AGENTS pins the current repo truth and fixed product invariants", () => {
     /Current honest state:/,
     /src\/cli\.ts.*installer runtime/s,
     /src\/install\/` contains the runtime contracts/s,
-    /moonshotai\/kimi-k2\.6/s,
+    /GET https:\/\/api\.gonkagate\.com\/v1\/models/s,
     /provider\.gonkagate\.options\.setCacheKey = false/,
     /@gonkagate\/mimo-code-setup/,
     /target upstream package: `@mimo-ai\/cli`/,
@@ -81,12 +80,12 @@ test("docs preserve security and MiMoCode verification constraints", () => {
   ]);
 });
 
-test("model validation docs do not mark candidate models as validated", () => {
+test("model validation docs separate live catalog availability from workflow proof", () => {
   const modelValidation = readText("docs/model-validation.md");
 
   assertMatchesAll(modelValidation, [
-    /MiMoCode-validated public model/i,
-    /recommended default/i,
+    /not the public picker allowlist/i,
+    /workflow proof ledger/i,
     /qwen\/qwen3-235b-a22b-instruct-2507-fp8/,
     /moonshotai\/kimi-k2\.6/,
     /minimaxai\/minimax-m2\.7/,

@@ -11,19 +11,21 @@ update these surfaces together:
 - `AGENTS.md` - repository truth, product/security invariants, implementation
   status, validation baseline, supported setup behavior, and validation command.
 - `README.md` - public status, npm entrypoint, runtime flow, supported flags,
-  config targets, current model-validation status, and local development checks.
+  config targets, live model-catalog behavior, and local development checks.
 - `docs/how-it-works.md` - runtime architecture, scope behavior, config-layer
   precedence, verification flow, and migration path.
 - `docs/security.md` - safe secret intake, managed storage, redaction, project
   commit-safety, and blocked unsafe override behavior.
-- `docs/model-validation.md` - candidate versus validated model truth and the
-  proof checklist required before public picker exposure.
+- `docs/model-validation.md` - MiMoCode workflow proof ledger, distinct from
+  live GonkaGate `/v1/models` catalog availability.
 - `docs/troubleshooting.md` - user-facing blocker taxonomy without asking users
   to paste raw `mimo --pure debug config` output.
 - `CHANGELOG.md` - meaningful user-facing runtime changes.
 - `src/constants/contract.ts` - package identity, public implementation status,
-  MiMoCode baseline, and curated registry publication state.
-- `src/constants/models.ts` - candidate/validated model registry truth.
+  MiMoCode baseline, and live catalog source.
+- `src/install/model-catalog.ts` - `/v1/models` fetch and response-shape
+  boundary.
+- `src/constants/models.ts` - model metadata and validation helper types.
 - `test/docs-contract.test.ts` and `test/package-contract.test.ts` - docs,
   constants, package metadata, and model registry agreement.
 - `test/cli.test.ts` - human and JSON CLI output semantics.
@@ -38,6 +40,7 @@ and cannot complete.
 ## Runtime Guard
 
 After runtime modules exist, docs must not keep claiming that `src/install/`
-does not exist. If a model is promoted to MiMoCode-validated, docs, runtime
-constants, validation records, CLI output, tests, and package contract metadata
-must all name the same public setup behavior.
+does not exist. If the live catalog behavior changes, docs, CLI output, tests,
+and package contract metadata must all name the same public setup behavior. If
+a model gains MiMoCode-specific workflow validation proof, update
+`docs/model-validation.md` and `src/constants/model-validation.ts` together.

@@ -74,7 +74,7 @@ export function verifyEffectiveConfigObject(
     if (!isRecord(getConfigValue(provider, ["models", key]))) {
       blockers.push(
         createEffectiveConfigMismatch(
-          `Resolved provider catalog is missing validated model ${key}.`,
+          `Resolved provider catalog is missing GonkaGate model ${key}.`,
         ),
       );
     }

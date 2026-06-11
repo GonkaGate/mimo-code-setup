@@ -30,11 +30,12 @@ Current honest state:
   installer runtime
 - `src/install/` contains the runtime contracts, dependency adapters,
   orchestration, managed writes, rollback, redaction, and verification helpers
-- `moonshotai/kimi-k2.6` is MiMoCode-validated for the current
-  `@mimo-ai/cli` `0.1.0` baseline and is the recommended public default
-- `minimaxai/minimax-m2.7` and
-  `qwen/qwen3-235b-a22b-instruct-2507-fp8` remain MiMoCode candidates, not
-  public validated models
+- the runtime collects the GonkaGate key before the model picker, calls
+  `GET https://api.gonkagate.com/v1/models`, and writes every returned model
+  into `provider.gonkagate.models`
+- `moonshotai/kimi-k2.6` has MiMoCode validation proof for the current
+  `@mimo-ai/cli` `0.1.0` baseline, but the public picker is now backed by the
+  live GonkaGate model catalog rather than a hardcoded validated allowlist
 
 If implementation status, package name, security flow, config locations,
 transport contract, or verified MiMoCode baseline changes, this file must be
@@ -46,10 +47,11 @@ The intended happy path is:
 
 1. user runs `npx @gonkagate/mimo-code-setup`
 2. installer validates local `mimo`
-3. installer offers only MiMoCode-validated GonkaGate models
-4. installer asks for `user` or `project` scope
-5. installer collects a GonkaGate `gp-...` key through a hidden prompt,
+3. installer collects a GonkaGate `gp-...` key through a hidden prompt,
    `GONKAGATE_API_KEY`, or `--api-key-stdin`
+4. installer calls `GET /v1/models` with that key and offers all returned
+   GonkaGate models
+5. installer asks for `user` or `project` scope
 6. installer writes the minimum safe MiMoCode config layers
 7. installer verifies durable MiMoCode config and current-session effective
    config
@@ -68,6 +70,7 @@ change.
 - intended public npm entrypoint: `npx @gonkagate/mimo-code-setup`
 - stable provider id: `gonkagate`
 - canonical base URL: `https://api.gonkagate.com/v1`
+- runtime model catalog source: `GET https://api.gonkagate.com/v1/models`
 - current transport target: `chat_completions`
 - current provider package: `@ai-sdk/openai-compatible`
 - future `/v1/responses` support should be added by migration, not product
@@ -90,6 +93,8 @@ change.
 - canonical installer-owned cache-key setting:
   `provider.gonkagate.options.setCacheKey = false`
 - project config must not own the secret binding
+- public setup must fetch the model catalog after safe API-key intake instead
+  of exposing a hardcoded model allowlist
 - installer success must be based on effective MiMoCode config, not only file
   writes
 - raw `mimo --pure debug config` output must not be printed because `{file:...}`
@@ -120,11 +125,11 @@ change.
 - `docs/specs/mimo-code-setup-prd/spec.md` is the product source of truth
 - `src/cli.ts` is the public runtime entrypoint and calls `src/install/`
   through `src/cli/` parse/execute/render seams
-- `src/install/` contains successful setup orchestration for the validated
-  public registry and preserves the blocked path for custom candidate-only
-  registries
+- `src/install/` contains successful setup orchestration for safe secret
+  intake, live GonkaGate model-catalog fetch, dynamic provider catalog writes,
+  and effective-config verification
 - `src/constants/` pins package, provider, transport, config, and
-  model-registry contracts
+  model-validation metadata contracts
 - `bin/gonkagate-mimo-code.js` is a thin wrapper over `dist/cli.js`
 - `.github/workflows/` contains CI, release-please, and npm publish workflows
 - `.agents/skills/` and `.claude/skills/` contain mirrored local skill packs
@@ -137,14 +142,14 @@ This repo currently does:
 - define the product contract for the MiMoCode setup tool
 - provide npm packaging, CI, release-please, and publish scaffolding
 - provide a public CLI entrypoint that can configure MiMoCode when the local
-  `mimo` baseline, secret input, and effective-config verification pass
+  `mimo` baseline, secret input, live model-catalog fetch, and
+  effective-config verification pass
 - provide docs and tests that protect the current runtime contract
 - provide mirrored local skills for repo-aware agent work
-- expose `moonshotai/kimi-k2.6` as the current MiMoCode-validated public model
+- expose every model returned by GonkaGate `GET /v1/models` as a setup choice
 
 This repo currently does not do:
 
-- expose candidate-only GonkaGate models as public setup choices
 - write direct MiMoCode `auth.json`
 - mutate shell profiles
 - generate `.env` files
@@ -200,12 +205,17 @@ Current public entrypoint and split parse/execute/render seams.
 
 Runtime implementation for installer contracts, dependency injection,
 platform/path helpers, managed writes, rollback, verification, and redacted
-results. The default public registry currently exposes `moonshotai/kimi-k2.6`
-after MiMoCode validation proof.
+results. The default public flow fetches the GonkaGate model catalog from
+`/v1/models` after safe API-key intake.
+
+### `src/install/model-catalog.ts`
+
+Trust-boundary parser and fetch adapter for `GET /v1/models`. Keep it strict
+about response shape and redaction-safe about failures.
 
 ### `src/constants/`
 
-Package, provider, transport, path, and model-registry constants.
+Package, provider, transport, path, and model-validation constants.
 
 ### `.agents/skills/` and `.claude/skills/`
 
@@ -225,14 +235,14 @@ When behavior changes:
 - keep scaffold docs and future runtime docs explicitly labeled so they cannot
   contradict each other silently
 
-Additional public model exposure is blocked until each model is
-MiMoCode-validated:
+Live catalog exposure must stay distinct from MiMoCode validation claims:
 
-- do not write docs that claim candidate model setup success before
-  model-validation proof exists
-- add runtime behavior tests before claiming any new end-user capability
-- update the curated model registry truth when MiMoCode validation status
-  changes
+- do not claim every `/v1/models` entry has full MiMoCode workflow validation
+  unless matching proof exists
+- add runtime behavior tests before changing catalog fetch, model selection, or
+  provider catalog write behavior
+- update the validation proof ledger when a model gains or loses
+  MiMoCode-specific validation status
 
 ## Validation
 

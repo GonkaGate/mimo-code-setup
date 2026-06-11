@@ -1,6 +1,5 @@
 import { join } from "node:path";
 import {
-  CURATED_MODEL_REGISTRY,
   createCuratedModelIndex,
   formatMimoCodeModelRef,
   type CuratedModelRegistry,
@@ -10,6 +9,7 @@ import type { InstallerBlocker, InstallerResult } from "./contracts.js";
 import type { InstallerDeps } from "./deps.js";
 import { toInstallerError } from "./errors.js";
 import { detectMimoCode } from "./mimocode.js";
+import { fetchGonkaGateModelCatalog } from "./model-catalog.js";
 import { resolveManagedPaths } from "./managed-files.js";
 import {
   resolveMimoGlobalPaths,
@@ -47,17 +47,10 @@ export async function runInstallSession(
   request: InstallSessionRequest,
   deps: InstallerDeps,
 ): Promise<InstallerResult> {
-  const registry = request.registry ?? CURATED_MODEL_REGISTRY;
   const effectiveDeps =
     request.cwd === undefined ? deps : { ...deps, cwd: () => request.cwd! };
 
   try {
-    const modelSelection = await selectValidatedModel(
-      request,
-      effectiveDeps,
-      registry,
-    );
-    const scope = await selectScope(request.scope, effectiveDeps, request.yes);
     const mimo = await detectMimoCode(effectiveDeps, {
       newerVersionPolicy: "block",
     });
@@ -79,6 +72,15 @@ export async function runInstallSession(
       { apiKeyStdin: request.apiKeyStdin },
       effectiveDeps,
     );
+    const registry =
+      request.registry ??
+      (await fetchGonkaGateModelCatalog(effectiveDeps, secret.key));
+    const modelSelection = await selectValidatedModel(
+      request,
+      effectiveDeps,
+      registry,
+    );
+    const scope = await selectScope(request.scope, effectiveDeps, request.yes);
     const transaction = new ManagedWriteTransaction(effectiveDeps);
     const plan = createScopeWritePlan({
       modelKey: modelSelection.model.key,

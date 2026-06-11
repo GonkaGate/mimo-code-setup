@@ -7,7 +7,7 @@ export const CONTRACT_METADATA = {
   packageName: "@gonkagate/mimo-code-setup",
   publicEntrypoint: "npx @gonkagate/mimo-code-setup",
   publicState:
-    "Installer runtime is implemented with moonshotai/kimi-k2.6 validated for MiMoCode; additional GonkaGate models remain candidates until gated proof exists.",
+    "Installer runtime fetches the available GonkaGate model catalog from /v1/models after safe API-key intake.",
   verifiedMimoCode: {
     checkedAt: "2026-06-11",
     minVersion: "0.1.0",

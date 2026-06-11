@@ -1,8 +1,8 @@
 # Security
 
-The runtime is implemented with a model-validation gate for public model
-exposure. These rules define the security contract for setup with validated
-models and for future candidate promotion.
+The runtime fetches public setup choices from GonkaGate `GET /v1/models` after
+safe API-key intake. These rules define the security contract for the key,
+catalog fetch, managed storage, and diagnostics.
 
 ## Secret Intake
 
@@ -49,6 +49,10 @@ The runtime must never print:
 
 Diagnostics should report redacted config paths, blocker categories, and
 actionable remediation without exposing secret contents.
+
+The `/v1/models` fetch must use the key only in the Authorization header and
+must not log request headers, response bodies, or raw upstream diagnostics that
+could contain secret-bearing data.
 
 ## Config Ownership
 
