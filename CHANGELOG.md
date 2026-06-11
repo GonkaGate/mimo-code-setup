@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.0](https://github.com/GonkaGate/mimo-code-setup/compare/v0.1.0...v0.2.0) (2026-06-11)
+
+
+### Features
+
+* implement MiMoCode setup runtime ([d974ed4](https://github.com/GonkaGate/mimo-code-setup/commit/d974ed434e1f6a022a305c47d6a2c62bf12db9d2))
+
+
+### Bug Fixes
+
+* make fake mimo integration Windows-safe ([c37b054](https://github.com/GonkaGate/mimo-code-setup/commit/c37b054f73aff123984c56443fd0766b7f75e069))
+
 ## [Unreleased]
 
 ### Added
