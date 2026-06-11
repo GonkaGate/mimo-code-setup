@@ -114,10 +114,15 @@ process.exit(1);
 }
 
 function run(command, args, options = {}) {
-  const result = spawnSync(command, args, {
+  const executable =
+    process.platform === "win32" && command === "npm" ? "npm.cmd" : command;
+  const useShell =
+    process.platform === "win32" && executable.toLowerCase().endsWith(".cmd");
+  const result = spawnSync(executable, args, {
     cwd: options.cwd ?? repoRoot,
     encoding: "utf8",
     env: options.env ?? process.env,
+    shell: useShell,
     stdio: ["ignore", "pipe", "pipe"],
   });
 
@@ -129,7 +134,7 @@ function run(command, args, options = {}) {
   if (result.status !== expectedStatus) {
     throw new Error(
       [
-        `Command failed: ${command} ${args.join(" ")}`,
+        `Command failed: ${executable} ${args.join(" ")}`,
         `status: ${result.status}`,
         `stdout: ${result.stdout}`,
         `stderr: ${result.stderr}`,
