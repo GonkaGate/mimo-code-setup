@@ -12,6 +12,11 @@ import {
 import { dirname } from "node:path";
 import process from "node:process";
 import { password, select } from "@inquirer/prompts";
+import {
+  classifyRuntimePlatform,
+  normalizeExecutableCandidates,
+  type RuntimePlatform,
+} from "./platform-path.js";
 
 export interface CommandExecutionOptions {
   cwd?: string;
@@ -152,45 +157,72 @@ export function createNodeFileSystem(): FileSystem {
 }
 
 export function createNodeCommandExecutor(): CommandExecutor {
+  const platform = classifyRuntimePlatform({ platform: process.platform });
+
   return {
-    run(command, args, options) {
-      return new Promise((resolve, reject) => {
-        const child = spawn(command, [...args], {
-          cwd: options?.cwd,
-          env: options?.env,
-          shell: false,
-          stdio: ["pipe", "pipe", "pipe"],
-          windowsHide: true,
-        });
+    async run(command, args, options) {
+      const candidates = normalizeExecutableCandidates(command, platform);
+      let lastError: unknown;
 
-        let stdout = "";
-        let stderr = "";
+      for (const candidate of candidates) {
+        try {
+          return await runCommandCandidate(candidate, args, options, platform);
+        } catch (error) {
+          if (isNodeError(error) && error.code === "ENOENT") {
+            lastError = error;
+            continue;
+          }
 
-        child.stdout.setEncoding("utf8");
-        child.stderr.setEncoding("utf8");
-        child.stdout.on("data", (chunk) => {
-          stdout += chunk;
-        });
-        child.stderr.on("data", (chunk) => {
-          stderr += chunk;
-        });
-        child.on("error", reject);
-        child.on("close", (exitCode) => {
-          resolve({
-            exitCode: exitCode ?? 1,
-            stderr,
-            stdout,
-          });
-        });
-
-        if (options?.input !== undefined) {
-          child.stdin.end(options.input);
-        } else {
-          child.stdin.end();
+          throw error;
         }
-      });
+      }
+
+      throw lastError ?? new Error(`Command not found: ${command}`);
     },
   };
+}
+
+function runCommandCandidate(
+  command: string,
+  args: readonly string[],
+  options: CommandExecutionOptions | undefined,
+  platform: RuntimePlatform,
+): Promise<CommandExecutionResult> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, [...args], {
+      cwd: options?.cwd,
+      env: options?.env,
+      shell: platform === "windows" && command.endsWith(".cmd"),
+      stdio: ["pipe", "pipe", "pipe"],
+      windowsHide: true,
+    });
+
+    let stdout = "";
+    let stderr = "";
+
+    child.stdout.setEncoding("utf8");
+    child.stderr.setEncoding("utf8");
+    child.stdout.on("data", (chunk) => {
+      stdout += chunk;
+    });
+    child.stderr.on("data", (chunk) => {
+      stderr += chunk;
+    });
+    child.on("error", reject);
+    child.on("close", (exitCode) => {
+      resolve({
+        exitCode: exitCode ?? 1,
+        stderr,
+        stdout,
+      });
+    });
+
+    if (options?.input !== undefined) {
+      child.stdin.end(options.input);
+    } else {
+      child.stdin.end();
+    }
+  });
 }
 
 function isNodeError(error: unknown): error is NodeJS.ErrnoException {

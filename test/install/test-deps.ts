@@ -57,7 +57,7 @@ export function createTestDeps(): TestDeps {
     cwd: () => cwd,
     env: () => ({ ...env }),
     fs: createNodeFileSystem(),
-    platform: "linux",
+    platform: process.platform,
     prompts: {
       async password() {
         return promptValues.shift() ?? "";

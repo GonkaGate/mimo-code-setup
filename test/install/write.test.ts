@@ -80,8 +80,8 @@ test("project config backups are relocated under the managed project-config back
       timestamp: deps.clock.now(),
     });
 
-    assert.match(result.backupPath ?? "", /backups\/project-config\//);
-    assert.doesNotMatch(result.backupPath ?? "", /repo\/\.mimocode/);
+    assert.match(result.backupPath ?? "", /backups[\\/]project-config[\\/]/);
+    assert.doesNotMatch(result.backupPath ?? "", /repo[\\/]\.mimocode/);
   } finally {
     deps.cleanup();
   }

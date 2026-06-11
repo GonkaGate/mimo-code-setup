@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import test from "node:test";
 import {
   GLOBAL_CONFIG_MERGE_FILENAMES,
@@ -42,20 +42,25 @@ test("resolveMimoGlobalPaths prefers mimo debug paths and falls back to XDG/MIMO
   debug.cleanup();
 
   const xdg = createTestDeps();
-  xdg.setEnv({ HOME: "/home/test", XDG_CONFIG_HOME: "/xdg/config" });
+  const xdgConfig = join(xdg.root, "xdg", "config");
+  xdg.setEnv({ HOME: join(xdg.root, "home"), XDG_CONFIG_HOME: xdgConfig });
   xdg.queueCommand({ exitCode: 1, stderr: "no debug", stdout: "" });
   assert.equal(
     (await resolveMimoGlobalPaths(xdg)).configDir,
-    "/xdg/config/mimocode",
+    join(xdgConfig, "mimocode"),
   );
   xdg.cleanup();
 
   const mimoHome = createTestDeps();
-  mimoHome.setEnv({ HOME: "/home/test", MIMOCODE_HOME: "/mimo/home" });
+  const mimoHomeRoot = join(mimoHome.root, "mimo-home");
+  mimoHome.setEnv({
+    HOME: join(mimoHome.root, "home"),
+    MIMOCODE_HOME: mimoHomeRoot,
+  });
   mimoHome.queueCommand({ exitCode: 1, stderr: "no debug", stdout: "" });
   assert.equal(
     (await resolveMimoGlobalPaths(mimoHome)).configDir,
-    "/mimo/home/config",
+    join(mimoHomeRoot, "config"),
   );
   mimoHome.cleanup();
 });
@@ -77,7 +82,7 @@ test("selectGlobalConfigTarget preserves existing candidates and exposes merge o
     target = await selectGlobalConfigTarget(deps, configDir);
     assert.equal(target.targetPath, join(configDir, "mimocode.jsonc"));
     assert.deepEqual(
-      target.candidatesInMergeOrder.map((path) => path.split("/").at(-1)),
+      target.candidatesInMergeOrder.map((path) => basename(path)),
       [...GLOBAL_CONFIG_MERGE_FILENAMES],
     );
   } finally {
