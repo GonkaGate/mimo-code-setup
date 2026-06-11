@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.0](https://github.com/GonkaGate/mimo-code-setup/compare/v0.2.0...v0.3.0) (2026-06-11)
+
+
+### Features
+
+* fetch GonkaGate model catalog from /v1/models ([4b041a6](https://github.com/GonkaGate/mimo-code-setup/commit/4b041a60ed11588acec2357a3953254f140fb4a3))
+* fetch GonkaGate model catalog from /v1/models ([44072ba](https://github.com/GonkaGate/mimo-code-setup/commit/44072ba26c942b0213f2f5427c083751c74046a7))
+
 ## [0.2.0](https://github.com/GonkaGate/mimo-code-setup/compare/v0.1.0...v0.2.0) (2026-06-11)
 
 
