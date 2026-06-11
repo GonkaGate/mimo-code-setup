@@ -60,14 +60,11 @@ process.stderr.write("unexpected fake mimo args: " + args.join(" ") + "\\n");
 process.exit(1);
 `;
   if (process.platform === "win32") {
-    const escapedScript = fakeMimoScript
-      .replaceAll("\\", "\\\\")
-      .replaceAll('"', '\\"')
-      .replaceAll("\r", "")
-      .replaceAll("\n", "\\n");
+    const fakeMimoEntry = join(fakeBin, "mimo.js");
+    writeFileSync(fakeMimoEntry, fakeMimoScript);
     writeFileSync(
       join(fakeBin, "mimo.cmd"),
-      `@echo off\r\n"${process.execPath}" -e "${escapedScript}" %*\r\n`,
+      `@echo off\r\n"${process.execPath}" "${fakeMimoEntry}" %*\r\n`,
     );
   } else {
     writeFileSync(join(fakeBin, "mimo"), fakeMimoScript, { mode: 0o755 });
@@ -98,12 +95,8 @@ process.exit(1);
 
   const primaryJson = JSON.parse(primary.stdout);
   const legacyJson = JSON.parse(legacy.stdout);
-  if (
-    primaryJson.status !== "blocked" ||
-    primaryJson.errorCode !== "non_interactive_secret_required"
-  ) {
-    throw new Error("Primary bin did not reach the expected secret gate.");
-  }
+  assertExpectedSecretGate("Primary", primaryJson);
+  assertExpectedSecretGate("Legacy", legacyJson);
   if (JSON.stringify(primaryJson) !== JSON.stringify(legacyJson)) {
     throw new Error("Primary and legacy bin outputs diverged.");
   }
@@ -143,4 +136,18 @@ function run(command, args, options = {}) {
   }
 
   return result;
+}
+
+function assertExpectedSecretGate(label, output) {
+  if (
+    output.status !== "blocked" ||
+    output.errorCode !== "non_interactive_secret_required"
+  ) {
+    throw new Error(
+      `${label} bin did not reach the expected secret gate: ${JSON.stringify({
+        errorCode: output.errorCode,
+        status: output.status,
+      })}`,
+    );
+  }
 }
