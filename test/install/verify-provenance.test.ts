@@ -9,18 +9,19 @@ test("secret provenance verifies managed secret and canonical raw global binding
   const deps = createTestDeps();
   const homeDir = join(deps.root, "home");
   const projectRoot = join(deps.root, "project");
+  const platform = process.platform === "win32" ? "windows" : "posix";
 
   try {
     const secret = await writeManagedSecret(deps, "gp-secret-value", {
       homeDir,
-      platform: "posix",
+      platform,
       projectRoot,
     });
     const blockers = await verifySecretProvenance(deps, {
       globalConfigContents:
         '{"provider":{"gonkagate":{"options":{"apiKey":"{file:~/.gonkagate/mimo-code/api-key}"}}}}',
       key: "gp-secret-value",
-      platform: "posix",
+      platform,
       projectConfigContents: '{"model":"gonkagate/alpha"}',
       secretPath: secret.path,
     });
@@ -54,28 +55,37 @@ test("secret provenance reports wrong binding, mismatch, and higher-precedence p
   }
 });
 
-test("secret provenance reports POSIX permission mismatch", async () => {
-  const deps = createTestDeps();
-  const homeDir = join(deps.root, "home");
-  const projectRoot = join(deps.root, "project");
+test(
+  "secret provenance reports POSIX permission mismatch",
+  {
+    skip:
+      process.platform === "win32"
+        ? "POSIX file permission bits are not meaningful on Windows."
+        : false,
+  },
+  async () => {
+    const deps = createTestDeps();
+    const homeDir = join(deps.root, "home");
+    const projectRoot = join(deps.root, "project");
 
-  try {
-    const secret = await writeManagedSecret(deps, "gp-secret-value", {
-      homeDir,
-      platform: "posix",
-      projectRoot,
-    });
-    await deps.fs.chmod(secret.path, 0o644);
-    const blockers = await verifySecretProvenance(deps, {
-      globalConfigContents:
-        '{"provider":{"gonkagate":{"options":{"apiKey":"{file:~/.gonkagate/mimo-code/api-key}"}}}}',
-      key: "gp-secret-value",
-      platform: "posix",
-      secretPath: secret.path,
-    });
+    try {
+      const secret = await writeManagedSecret(deps, "gp-secret-value", {
+        homeDir,
+        platform: "posix",
+        projectRoot,
+      });
+      await deps.fs.chmod(secret.path, 0o644);
+      const blockers = await verifySecretProvenance(deps, {
+        globalConfigContents:
+          '{"provider":{"gonkagate":{"options":{"apiKey":"{file:~/.gonkagate/mimo-code/api-key}"}}}}',
+        key: "gp-secret-value",
+        platform: "posix",
+        secretPath: secret.path,
+      });
 
-    assert.match(JSON.stringify(blockers), /owner-only/);
-  } finally {
-    deps.cleanup();
-  }
-});
+      assert.match(JSON.stringify(blockers), /owner-only/);
+    } finally {
+      deps.cleanup();
+    }
+  },
+);
