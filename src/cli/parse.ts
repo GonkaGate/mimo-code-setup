@@ -23,7 +23,7 @@ function createProgram(): Command {
       "--api-key-stdin",
       "read the GonkaGate API key from stdin when runtime setup is enabled",
     )
-    .option("--model <key>", "select a MiMoCode-validated GonkaGate model")
+    .option("--model <key>", "select a GonkaGate model id from /v1/models")
     .option("--scope <scope>", "select setup scope: user or project")
     .option("--cwd <path>", "resolve project scope from this working directory")
     .option("--yes", "accept safe non-interactive defaults when unambiguous")

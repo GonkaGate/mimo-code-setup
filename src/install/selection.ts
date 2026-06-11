@@ -30,7 +30,7 @@ export async function selectValidatedModel(
       category: "model_registry",
       code: "validated_models_unavailable",
       message:
-        "No GonkaGate model is validated for MiMoCode yet. Setup cannot safely continue.",
+        "No GonkaGate model is available for MiMoCode setup. Setup cannot safely continue.",
     });
   }
 
@@ -42,7 +42,7 @@ export async function selectValidatedModel(
       throw new InstallerError({
         category: "model_registry",
         code: "unsupported_model",
-        message: `Model ${request.modelKey} is not validated for MiMoCode setup.`,
+        message: `Model ${request.modelKey} is not available for MiMoCode setup.`,
       });
     }
 
@@ -63,7 +63,7 @@ export async function selectValidatedModel(
       category: "model_registry",
       code: "ambiguous_model_selection",
       message:
-        "Multiple validated GonkaGate models are available; choose one with --model.",
+        "Multiple GonkaGate models are available; choose one with --model.",
     });
   }
 
@@ -80,7 +80,7 @@ export async function selectValidatedModel(
     throw new InstallerError({
       category: "model_registry",
       code: "unsupported_model",
-      message: "Selected model is not validated for MiMoCode setup.",
+      message: "Selected model is not available for MiMoCode setup.",
     });
   }
 

@@ -38,6 +38,19 @@ export interface CommandExecutor {
   ): Promise<CommandExecutionResult>;
 }
 
+export interface HttpJsonRequest {
+  headers?: Readonly<Record<string, string>>;
+}
+
+export interface HttpJsonResponse {
+  body: unknown;
+  status: number;
+}
+
+export interface HttpClient {
+  getJson(url: string, request?: HttpJsonRequest): Promise<HttpJsonResponse>;
+}
+
 export interface FileStat {
   isDirectory(): boolean;
   isFile(): boolean;
@@ -83,6 +96,7 @@ export interface InstallerDeps {
   cwd(): string;
   env(): NodeJS.ProcessEnv;
   fs: FileSystem;
+  http: HttpClient;
   platform: NodeJS.Platform;
   prompts: PromptAdapter;
   readStdin(): Promise<string>;
@@ -98,6 +112,7 @@ export function createNodeDeps(): InstallerDeps {
     cwd: () => process.cwd(),
     env: () => ({ ...process.env }),
     fs: createNodeFileSystem(),
+    http: createNodeHttpClient(),
     platform: process.platform,
     prompts: {
       password: (message) => password({ message }),
@@ -108,6 +123,36 @@ export function createNodeDeps(): InstallerDeps {
       stderr: process.stderr,
       stdin: process.stdin,
       stdout: process.stdout,
+    },
+  };
+}
+
+export function createNodeHttpClient(): HttpClient {
+  return {
+    async getJson(url, request) {
+      const response = await fetch(url, {
+        headers: request?.headers,
+      });
+      const text = await response.text();
+
+      if (text.trim().length === 0) {
+        return {
+          body: undefined,
+          status: response.status,
+        };
+      }
+
+      try {
+        return {
+          body: JSON.parse(text) as unknown,
+          status: response.status,
+        };
+      } catch {
+        return {
+          body: text,
+          status: response.status,
+        };
+      }
     },
   };
 }

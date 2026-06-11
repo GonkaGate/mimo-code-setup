@@ -1,9 +1,10 @@
 # Troubleshooting
 
-This repository currently ships an installer runtime with
-`moonshotai/kimi-k2.6` validated for MiMoCode. If the CLI reports
-`validated_models_unavailable`, the local package or registry is stale or a
-custom injected registry contains no validated models.
+This repository currently ships an installer runtime that asks for a safe
+GonkaGate API-key input, fetches `GET /v1/models`, and builds the setup picker
+from every returned model id. If the CLI reports `model_catalog_fetch_failed`,
+check network access and GonkaGate API availability. If it reports
+`model_catalog_empty`, the key was accepted but the catalog returned no models.
 
 ## Expected Development Checks
 
@@ -22,6 +23,7 @@ The implemented installer should report blockers for:
 - missing or unsupported `mimo`
 - unsupported MiMoCode config shape
 - invalid or unsafe secret input
+- failed or malformed GonkaGate `/v1/models` catalog fetch
 - `MIMOCODE_CONFIG`, `MIMOCODE_CONFIG_DIR`, or `MIMOCODE_CONFIG_CONTENT`
   conflicts
 - project config that tries to own `provider.gonkagate.options.apiKey`

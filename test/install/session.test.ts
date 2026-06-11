@@ -34,6 +34,29 @@ function matchingConfig() {
   });
 }
 
+function matchingLiveConfig() {
+  return JSON.stringify({
+    model: "gonkagate/moonshotai/kimi-k2.6",
+    small_model: "gonkagate/moonshotai/kimi-k2.6",
+    provider: {
+      gonkagate: {
+        npm: CURRENT_PROVIDER_PACKAGE,
+        options: {
+          baseURL: "https://api.gonkagate.com/v1",
+          apiKey: "gp-secret-value",
+        },
+        models: {
+          "moonshotai/kimi-k2.6": { name: "moonshotai/kimi-k2.6" },
+          "minimaxai/minimax-m2.7": { name: "minimaxai/minimax-m2.7" },
+          "qwen/qwen3-235b-a22b-instruct-2507-fp8": {
+            name: "qwen/qwen3-235b-a22b-instruct-2507-fp8",
+          },
+        },
+      },
+    },
+  });
+}
+
 function prepareDeps() {
   const deps = createTestDeps();
   const home = join(deps.root, "home");
@@ -56,6 +79,25 @@ function queueSuccessfulCommands(
   deps.queueCommand({ exitCode: 0, stderr: "", stdout: matchingConfig() });
   deps.queueCommand({ exitCode: 0, stderr: "", stdout: "gonkagate/alpha\n" });
   deps.queueCommand({ exitCode: 0, stderr: "", stdout: matchingConfig() });
+}
+
+function queueSuccessfulLiveCommands(
+  deps: ReturnType<typeof createTestDeps>,
+  configDir: string,
+) {
+  deps.queueCommand({ exitCode: 0, stderr: "", stdout: "mimo 0.1.0\n" });
+  deps.queueCommand({
+    exitCode: 0,
+    stderr: "",
+    stdout: JSON.stringify({ config: configDir }),
+  });
+  deps.queueCommand({ exitCode: 0, stderr: "", stdout: matchingLiveConfig() });
+  deps.queueCommand({
+    exitCode: 0,
+    stderr: "",
+    stdout: "gonkagate/moonshotai/kimi-k2.6\n",
+  });
+  deps.queueCommand({ exitCode: 0, stderr: "", stdout: matchingLiveConfig() });
 }
 
 test("install session succeeds for user scope with fake mimo and writes state after durable verification", async () => {
@@ -82,6 +124,39 @@ test("install session succeeds for user scope with fake mimo and writes state af
       ),
       /lastDurableSetupAt/,
     );
+  } finally {
+    deps.cleanup();
+  }
+});
+
+test("install session fetches the live GonkaGate catalog and writes every returned model", async () => {
+  const { deps, home } = prepareDeps();
+  const configDir = join(home, ".config", "mimocode");
+  queueSuccessfulLiveCommands(deps, configDir);
+  deps.queueHttpResponse({
+    body: {
+      data: [
+        { id: "moonshotai/kimi-k2.6", object: "model" },
+        { id: "minimaxai/minimax-m2.7", object: "model" },
+        { id: "qwen/qwen3-235b-a22b-instruct-2507-fp8", object: "model" },
+      ],
+      object: "list",
+    },
+    status: 200,
+  });
+
+  try {
+    const result = await runInstallSession({ scope: "user", yes: true }, deps);
+    const globalConfig = await deps.fs.readText(
+      join(configDir, "mimocode.jsonc"),
+    );
+
+    assert.equal(result.status, "success");
+    assert.equal(result.ok, true);
+    assert.equal(result.model, "moonshotai/kimi-k2.6");
+    assert.match(globalConfig, /moonshotai\/kimi-k2\.6/);
+    assert.match(globalConfig, /minimaxai\/minimax-m2\.7/);
+    assert.match(globalConfig, /qwen\/qwen3-235b-a22b-instruct-2507-fp8/);
   } finally {
     deps.cleanup();
   }

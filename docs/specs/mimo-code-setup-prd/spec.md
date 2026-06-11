@@ -81,10 +81,11 @@ The tool:
 1. validates local `mimo`
 2. verifies that the installed MiMoCode version is supported or clearly reports
    that it is newer than the last audited baseline
-3. offers only MiMoCode-validated GonkaGate model choices
-4. lets the user choose `user` or `project` scope
-5. accepts a GonkaGate API key through a hidden prompt, `GONKAGATE_API_KEY`, or
+3. accepts a GonkaGate API key through a hidden prompt, `GONKAGATE_API_KEY`, or
    `--api-key-stdin`
+4. calls `GET /v1/models` with that key and offers every returned GonkaGate
+   model id
+5. lets the user choose `user` or `project` scope
 6. writes the minimum safe MiMoCode config automatically
 7. stores the secret outside the repository
 8. verifies durable raw config provenance separately from resolved MiMoCode
@@ -115,7 +116,8 @@ Secondary user:
 
 Contributor user:
 
-- a maintainer adding or validating curated GonkaGate models for MiMoCode
+- a maintainer validating GonkaGate models for documented MiMoCode workflow
+  proof
 
 ## In Scope
 
@@ -124,7 +126,7 @@ Contributor user:
 - configuration of already installed local MiMoCode
 - hidden or automation-safe secret input
 - installer-owned managed secret file
-- curated model picker backed by MiMoCode-specific validation
+- live GonkaGate model picker backed by `GET /v1/models`
 - `user` and `project` setup scope
 - managed config writes with backups
 - effective-config verification through MiMoCode's debug/config surfaces
@@ -138,8 +140,7 @@ Contributor user:
 - creating `.env` files
 - accepting a plain `--api-key` flag
 - arbitrary custom base URLs
-- arbitrary custom model ids
-- live `/models` discovery as the main onboarding UX
+- arbitrary custom model ids outside the authenticated GonkaGate catalog
 - writing directly to MiMoCode `auth.json` in v1
 - claiming `/v1/responses` support today
 - configuring non-GonkaGate providers
@@ -402,7 +403,7 @@ This keeps project config commit-safe by default.
 ### Provider Config Shape
 
 The managed global provider definition must be equivalent to this shape, with
-the actual `models` entries generated from the curated registry:
+the actual `models` entries generated from GonkaGate `/v1/models`:
 
 ```json
 {
@@ -449,41 +450,38 @@ emitted by the AI SDK when cache keys are enabled.
 
 ### Model Strategy
 
-The onboarding flow must not depend on live runtime model discovery.
+The onboarding flow must fetch the live GonkaGate catalog after safe API-key
+intake.
 
-Instead it ships a curated model registry that records, per model:
+Runtime model source:
 
-- stable GonkaGate setup key, using the full upstream GonkaGate model slug
-- upstream GonkaGate model id
-- display name
-- transport kind
-- provider package
-- validation status
-- optional context and output limits
-- MiMoCode capability metadata such as tool calling, reasoning, attachments,
-  modalities, interleaving, prompt cache TTL, headers, model options, and
-  variants
-- optional migration metadata for future provider-package changes
+- endpoint: `GET https://api.gonkagate.com/v1/models`
+- auth: `Authorization: Bearer <gp-key>`
+- expected response shape: `{ "object": "list", "data": [{ "id": "..."}] }`
+- setup keys: every returned `data[].id`
 
-Registry keys must map cleanly to MiMoCode's `provider/model` model-ref
-format. Because MiMoCode treats the first slash segment as provider id and
-rejoins the rest as model id, GonkaGate registry keys must use the full
-upstream slug, for example `moonshotai/kimi-k2.6`. Validated entries can then
-be written under `provider.gonkagate.models` and the selected default can be
-written as `gonkagate/<provider-slug>/<model-slug>`.
+The installer must not hardcode the public setup model list. It should parse
+the authenticated `/v1/models` response, preserve the returned order, dedupe
+duplicate ids, and write every returned model id under
+`provider.gonkagate.models`.
 
-Only MiMoCode-validated models should be shown to end users.
+Model ids must map cleanly to MiMoCode's `provider/model` model-ref format.
+Because MiMoCode treats the first slash segment as provider id and rejoins the
+rest as model id, GonkaGate model ids must be written using the full upstream
+slug, for example `moonshotai/kimi-k2.6`. The selected default is written as
+`gonkagate/<provider-slug>/<model-slug>`.
 
-Models that were previously validated for `opencode-setup` are useful
-candidates, not automatically validated MiMoCode models.
+GonkaGate `/v1/models` availability is the public setup-catalog source of
+truth. MiMoCode workflow validation records remain a separate proof ledger for
+claims about richer MiMoCode behavior.
 
-### Model Validation Gate
+### Model Validation Proof
 
-A model may be marked `validated` only after end-to-end verification against
-the current verified MiMoCode baseline for the workflows the product claims to
-support.
+A model may be documented as MiMoCode workflow-validated only after end-to-end
+verification against the current verified MiMoCode baseline for the workflows
+the product claims to support.
 
-Minimum validation proof for a curated GonkaGate model includes:
+Minimum validation proof for a GonkaGate model includes:
 
 - `mimo` TUI startup with the selected model active
 - `mimo run` with the selected model
@@ -506,9 +504,9 @@ If GonkaGate later claims MiMoCode-specific memory, checkpoint, subagent,
 compose, dream, distill, voice, or max-mode compatibility, the model must be
 validated for those flows before the product advertises that support.
 
-A model must not be marked `validated` if its working setup depends on
-undocumented manual tweaks that are not representable in the curated registry
-contract.
+A model must not be documented as workflow-validated if its working setup
+depends on undocumented manual tweaks that are not representable in the
+managed provider config contract.
 
 ### `small_model` Policy
 
@@ -528,9 +526,9 @@ Why:
   exists
 
 The selected model is only the setup default. The installer must also write
-every MiMoCode-validated curated model into `provider.gonkagate.models` so
-MiMoCode's model picker can switch between managed GonkaGate models after
-setup.
+every model returned by GonkaGate `/v1/models` into
+`provider.gonkagate.models` so MiMoCode's model picker can switch between
+managed GonkaGate models after setup.
 
 ### Current Transport Strategy
 
@@ -552,7 +550,7 @@ Migration contract:
 - package identity remains `@gonkagate/mimo-code-setup`
 - secret location remains stable
 - rerunning the installer is the official migration path
-- curated registry and install-state metadata decide whether migration happens
+- live catalog and install-state metadata decide whether migration happens
   through:
   - a whole-provider package change
   - or a per-model provider override
@@ -564,15 +562,13 @@ The installer owns only the GonkaGate-managed subset of config.
 User-level managed keys:
 
 - `provider.gonkagate` in MiMoCode global config
-- the full validated GonkaGate model catalog under
+- the full live GonkaGate model catalog returned by `/v1/models` under
   `provider.gonkagate.models`
 - `provider.gonkagate.options.apiKey` with the canonical file binding
-- validated GonkaGate compatibility settings under `provider.gonkagate` and
-  its model entries when the curated registry requires them
 - GonkaGate-managed `model` when scope is `user`
 - GonkaGate-managed `small_model` when scope is `user`
 - stale activation cleanup in the old target only when the installer can prove
-  ownership through current curated GonkaGate refs or install state
+  ownership through current live GonkaGate refs or install state
 
 Project-level managed keys:
 
@@ -587,8 +583,8 @@ The installer does not own:
   permissions, formatter, LSP, or tool settings
 - MiMoCode `auth.json`
 - non-owned `model` / `small_model` refs
-- non-owned GonkaGate refs that are not in install state or the curated
-  registry
+- non-owned GonkaGate refs that are not in install state or the live model
+  catalog
 
 The installer must preserve unrelated config.
 
@@ -664,7 +660,7 @@ Before claiming success, the installer must:
 - verify `model` and `small_model`
 - verify `provider.gonkagate`
 - verify provider package, base URL, and current transport shape
-- verify the curated model catalog shape
+- verify the live model catalog shape
 - verify provider allow/deny gating
 - verify selected model whitelist/blacklist gating
 - prove the durable plain-`mimo` result separately from current-session
@@ -693,7 +689,8 @@ The setup tool must not depend on a future `gonkagate doctor`.
 6. The installer must configure GonkaGate with the current
    `@ai-sdk/openai-compatible` provider package.
 7. The installer must use the canonical GonkaGate base URL.
-8. The installer must use curated MiMoCode-validated models.
+8. The installer must fetch the public setup model list from GonkaGate
+   `/v1/models` after safe API-key intake.
 9. The installer must preserve unrelated MiMoCode config.
 10. The installer must set `model` and `small_model` explicitly.
 11. The installer must support rerun as the official update path.
@@ -713,9 +710,9 @@ The setup tool must not depend on a future `gonkagate doctor`.
 21. The installer must write rollback backups before replacing managed user or
     project files.
 22. The installer must keep project scope commit-safe by default.
-23. The curated model registry must be able to encode MiMoCode compatibility
-    settings beyond model id and display name.
-24. The installer must write every validated curated model into
+23. The live model catalog parser must reject malformed `/v1/models` responses
+    before writing config.
+24. The installer must write every returned GonkaGate model id into
     `provider.gonkagate.models`.
 25. The installer must report inferred remote or managed blockers when
     resolved config proves a mismatch without a locally inspectable cause.
@@ -731,8 +728,8 @@ The setup tool must not depend on a future `gonkagate doctor`.
 6. Native Windows secret and state handling must be explicit about relying on
    current-user profile ACL inheritance instead of portable owner-only `chmod`.
 7. Future responses migration must not require a new package identity.
-8. Interactive setup should keep the public curated picker visible even when
-   the curated validated list is small.
+8. Interactive setup should fetch the live model catalog before showing the
+   model picker.
 9. Safe non-interactive setup may accept recommended defaults only when the
    installer has enough information to do so without ambiguity.
 10. Diagnostics must be actionable without exposing secrets.
@@ -745,7 +742,7 @@ The setup tool must not depend on a future `gonkagate doctor`.
 - native MiMoCode `auth.json` integration, if a later product decision chooses
   to use it
 - richer post-setup live GonkaGate session verification
-- broader curated model registry
+- richer live catalog metadata, if `/v1/models` starts returning it
 - cheaper validated `small_model` strategy
 - MiMoCode model-group integration
 - future `/v1/responses` migration
@@ -769,9 +766,12 @@ The setup tool must not depend on a future `gonkagate doctor`.
   credentials into git.
 - If runtime override layers are ignored, setup can report success while
   `mimo` still uses a different provider.
-- If curated models are copied from another setup repository without
-  MiMoCode-specific validation, the product can claim support for workflows
-  that fail in MiMoCode.
+- If GonkaGate `/v1/models` returns a malformed or partial catalog, the setup
+  picker can misrepresent available models unless the boundary parser blocks
+  before config writes.
+- If live catalog availability is confused with MiMoCode workflow validation,
+  the product can overclaim support for workflows that have not been proven in
+  MiMoCode.
 - If Windows support is claimed without native proof, the secret protection and
   path-resolution story may be wrong.
 
@@ -786,7 +786,7 @@ mimo
 ```
 
 The installer should configure GonkaGate as a MiMoCode custom provider with a
-curated validated model catalog, a safe managed secret file, scope-aware config
-writes, rollback backups, and effective-config verification. It should preserve
-MiMoCode's normal user experience while removing the need for users to
-understand custom-provider internals.
+live `/v1/models` provider catalog, a safe managed secret file, scope-aware
+config writes, rollback backups, and effective-config verification. It should
+preserve MiMoCode's normal user experience while removing the need for users
+to understand custom-provider internals.

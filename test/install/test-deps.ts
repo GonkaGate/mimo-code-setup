@@ -4,6 +4,8 @@ import { join } from "node:path";
 import type {
   CommandExecutionOptions,
   CommandExecutionResult,
+  HttpJsonRequest,
+  HttpJsonResponse,
   InstallerDeps,
 } from "../../src/install/deps.js";
 import { createNodeFileSystem } from "../../src/install/deps.js";
@@ -14,10 +16,17 @@ export interface RecordedCommand {
   options?: CommandExecutionOptions;
 }
 
+export interface RecordedHttpRequest {
+  request?: HttpJsonRequest;
+  url: string;
+}
+
 export interface TestDeps extends InstallerDeps {
   cleanup(): void;
   commandLog: RecordedCommand[];
+  httpLog: RecordedHttpRequest[];
   queueCommand(result: CommandExecutionResult): void;
+  queueHttpResponse(result: HttpJsonResponse): void;
   queuePrompt(value: string): void;
   root: string;
   setCwd(path: string): void;
@@ -32,6 +41,8 @@ export function createTestDeps(): TestDeps {
   let stdinContents = "";
   const commandResults: CommandExecutionResult[] = [];
   const commandLog: RecordedCommand[] = [];
+  const httpResults: HttpJsonResponse[] = [];
+  const httpLog: RecordedHttpRequest[] = [];
   const promptValues: string[] = [];
 
   const deps: TestDeps = {
@@ -57,6 +68,18 @@ export function createTestDeps(): TestDeps {
     cwd: () => cwd,
     env: () => ({ ...env }),
     fs: createNodeFileSystem(),
+    http: {
+      async getJson(url, request) {
+        httpLog.push({ request, url });
+        return (
+          httpResults.shift() ?? {
+            body: { error: { message: "missing queued http response" } },
+            status: 599,
+          }
+        );
+      },
+    },
+    httpLog,
     platform: process.platform,
     prompts: {
       async password() {
@@ -69,6 +92,9 @@ export function createTestDeps(): TestDeps {
     readStdin: async () => stdinContents,
     queueCommand(result) {
       commandResults.push(result);
+    },
+    queueHttpResponse(result) {
+      httpResults.push(result);
     },
     queuePrompt(value) {
       promptValues.push(value);

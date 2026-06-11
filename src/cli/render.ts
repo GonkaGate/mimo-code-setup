@@ -6,11 +6,12 @@ import {
   MANAGED_SECRET_FILE_REF,
   TARGET_CLI,
 } from "../constants/gateway.js";
-import { SUPPORTED_MODELS } from "../constants/models.js";
 import type { InstallerResult } from "../install/contracts.js";
 import { redactText } from "../install/redact.js";
 import { redactJsonValue } from "../install/redact.js";
 import type { CliEntrypointError } from "./contracts.js";
+
+const MODELS_ENDPOINT = `${GONKAGATE_BASE_URL}/models`;
 
 export function renderStatusJson(): string {
   return `${JSON.stringify(
@@ -24,11 +25,7 @@ export function renderStatusJson(): string {
         baseURL: GONKAGATE_BASE_URL,
         npm: CURRENT_PROVIDER_PACKAGE,
       },
-      curatedModels: SUPPORTED_MODELS.map((model) => ({
-        key: model.key,
-        modelId: model.modelId,
-        validationStatus: model.validationStatus,
-      })),
+      modelsEndpoint: MODELS_ENDPOINT,
       message: CONTRACT_METADATA.publicState,
     },
     null,
@@ -47,8 +44,9 @@ export function renderStatusText(): string {
     `Target CLI: ${TARGET_CLI}`,
     `Provider: ${GONKAGATE_PROVIDER_ID}`,
     `Base URL: ${GONKAGATE_BASE_URL}`,
+    `Models endpoint: ${MODELS_ENDPOINT}`,
     "",
-    "Validated model: gonkagate/moonshotai/kimi-k2.6",
+    "Runtime model catalog is fetched from GonkaGate after API-key intake.",
     "",
   ].join("\n");
 }

@@ -111,7 +111,7 @@ test("effective config verification catches wrong small_model, package, base URL
   assert.match(serialized, /small_model/);
   assert.match(serialized, /provider package/);
   assert.match(serialized, /base URL/);
-  assert.match(serialized, /missing validated model/);
+  assert.match(serialized, /missing GonkaGate model/);
   deps.cleanup();
 });
 
