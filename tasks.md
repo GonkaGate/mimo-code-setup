@@ -31,13 +31,13 @@ focused fake-mimo integration/package smoke checks.
 
 Goal success criteria:
 
-- [ ] Every task from Task 1 through Task 31 is completed with its task-level
+- [x] Every task from Task 1 through Task 31 is completed with its task-level
       verification evidence.
-- [ ] Every checkpoint records the commands or artifacts that prove progress.
-- [ ] The Final Readiness Gate passes.
-- [ ] Public docs, tests, package metadata, constants, and runtime behavior
+- [x] Every checkpoint records the commands or artifacts that prove progress.
+- [x] The Final Readiness Gate passes.
+- [x] Public docs, tests, package metadata, constants, and runtime behavior
       agree on the shipped implementation status.
-- [ ] No task is marked complete from intent, code presence, or broad CI alone
+- [x] No task is marked complete from intent, code presence, or broad CI alone
       when its own verification surface is still missing.
 
 Goal operating loop:
@@ -1404,28 +1404,25 @@ and CI-backed fake-`mimo` execution.
 
 **Acceptance criteria:**
 
-- [ ] Ubuntu CI exercises the fake-`mimo` integration path.
-- [ ] Windows CI exercises native Windows path and command-shim behavior.
-- [ ] WSL detection and path handling are fixture-backed.
-- [ ] Native Windows support is not claimed beyond what CI and integration
+- [x] Ubuntu CI exercises the fake-`mimo` integration path.
+- [x] Windows CI exercises native Windows path and command-shim behavior.
+- [x] WSL detection and path handling are fixture-backed.
+- [x] Native Windows support is not claimed beyond what CI and integration
       proof cover.
 
 **Verification:**
 
-- [ ] Focused tests cover POSIX, WSL, native Windows, Git Bash style paths,
+- [x] Focused tests cover POSIX, WSL, native Windows, Git Bash style paths,
       `.cmd` shim resolution, and fake-`mimo` spawn behavior.
-- [ ] Future command: `rtk npm run ci` on Ubuntu and Windows CI.
+- [x] Future command: `rtk npm run ci` on Ubuntu and Windows CI.
 
-**Partial evidence:** Strengthened fake-`mimo` harness to generate a real
-Windows `.cmd` shim, added executor-backed fake-`mimo` spawn coverage, and
-added Git Bash Windows path normalization tests. Fresh local checks passed:
-`rtk npm run typecheck`; `rtk npm run test` (78 tests); later full
-`rtk npm run ci` passed after the validated Kimi promotion. The checked-in CI
-workflow has an `ubuntu-latest` and `windows-latest` matrix, but the GitHub
-repository is currently empty and no remote Actions run exists for this
-worktree. `gh` and `act` are not installed locally. Remaining proof gap: actual
-Ubuntu and native Windows CI evidence is still required before T029 can be
-marked complete.
+**Evidence:** Strengthened fake-`mimo` harness to generate a real Windows
+`.cmd` shim, added executor-backed fake-`mimo` spawn coverage, added Git Bash
+Windows path normalization tests, and fixed Windows-only test/smoke gaps found
+by real CI. Fresh local `rtk npm run ci` passed. GitHub Actions CI run
+`27370403532` passed for SHA `5b073dc04ca1e7e7ed4550e784f96831e91468c4` with
+`test (ubuntu-latest)` success and `test (windows-latest)` success, exercising
+the same `npm run ci` path with fake-`mimo` integration and package smoke.
 
 **Dependencies:** Tasks 5, 7-9, 23
 
@@ -1448,28 +1445,26 @@ fake-`mimo` harness.
 
 **Acceptance criteria:**
 
-- [ ] Package exports include only intended runtime files, docs, README,
+- [x] Package exports include only intended runtime files, docs, README,
       CHANGELOG, and LICENSE.
-- [ ] Both `mimo-code-setup` and legacy `gonkagate-mimo-code` bin names invoke
+- [x] Both `mimo-code-setup` and legacy `gonkagate-mimo-code` bin names invoke
       the same production runtime.
-- [ ] Packed-bin smoke does not require real credentials or network.
-- [ ] Publish workflow still runs `npm run ci` before OIDC publish.
+- [x] Packed-bin smoke does not require real credentials or network.
+- [x] Publish workflow still runs `npm run ci` before OIDC publish.
 
 **Verification:**
 
-- [ ] Focused package smoke test passes locally.
-- [ ] Future command: `rtk npm run package:check`.
-- [ ] Future command: `rtk npm run ci`.
+- [x] Focused package smoke test passes locally.
+- [x] Future command: `rtk npm run package:check`.
+- [x] Future command: `rtk npm run ci`.
 
-**Partial evidence:** Added `scripts/package-smoke.mjs` and wired
-`package:check` to `npm run build && publint && npm run package:smoke`.
-Fresh local checks passed: `rtk npm run package:check`,
-`rtk npm run typecheck`, and `rtk npm run test` (78 tests). After the validated
-Kimi promotion, package smoke was updated to exercise the packaged production
-bins through fake `mimo --version` and `mimo debug paths` until the safe
-non-interactive secret gate; fresh `rtk npm run package:check` and
-`rtk npm run ci` passed. T030 remains unchecked because it depends on T029,
-whose Ubuntu/Windows CI proof is still missing.
+**Evidence:** Added `scripts/package-smoke.mjs` and wired `package:check` to
+`npm run build && publint && npm run package:smoke`. Package smoke packs the
+tarball, rejects unexpected files, installs into an isolated temp project, and
+executes both packaged bin names through fake `mimo --version` and
+`mimo debug paths` until the safe non-interactive secret gate. Fresh local
+`rtk npm run package:check` and `rtk npm run ci` passed. GitHub Actions CI run
+`27370403532` passed on Ubuntu and Windows through the same `npm run ci` path.
 
 **Dependencies:** Tasks 23-25, 29
 
@@ -1491,30 +1486,30 @@ shipped runtime truth.
 
 **Acceptance criteria:**
 
-- [ ] README describes the implemented flow and no longer says the runtime is
+- [x] README describes the implemented flow and no longer says the runtime is
       `not_implemented`.
-- [ ] AGENTS truth matches shipped behavior, supported platforms, model
+- [x] AGENTS truth matches shipped behavior, supported platforms, model
       validation status, and MiMoCode baseline.
-- [ ] `docs/how-it-works.md`, `docs/security.md`,
+- [x] `docs/how-it-works.md`, `docs/security.md`,
       `docs/troubleshooting.md`, and `docs/model-validation.md` match runtime
       behavior.
-- [ ] `CHANGELOG.md` records the meaningful user-facing change.
-- [ ] Tests no longer assert scaffold-only behavior once runtime success is
+- [x] `CHANGELOG.md` records the meaningful user-facing change.
+- [x] Tests no longer assert scaffold-only behavior once runtime success is
       real.
 
 **Verification:**
 
-- [ ] Contract tests prove docs, package metadata, constants, CLI output, and
+- [x] Contract tests prove docs, package metadata, constants, CLI output, and
       model registry truth agree.
-- [ ] Future command: `rtk npm run ci`.
+- [x] Future command: `rtk npm run ci`.
 
-**Partial evidence:** Public truth has been flipped from scaffold/candidate-only
-to shipped runtime with `moonshotai/kimi-k2.6` validated and recommended,
+**Evidence:** Public truth has been flipped from scaffold/candidate-only to
+shipped runtime with `moonshotai/kimi-k2.6` validated and recommended,
 full-slug model keys, and `setCacheKey: false`. Updated AGENTS, README,
 CHANGELOG, PRD, how-it-works, security, troubleshooting, model-validation docs,
 runtime constants, CLI tests, package contract tests, and docs contract tests.
-Fresh `rtk npm run ci` passed locally. T031 remains unchecked because it depends
-on T029-T030 and the required remote Ubuntu/Windows CI proof is still missing.
+Fresh local `rtk npm run ci` passed. GitHub Actions CI run `27370403532`
+passed on Ubuntu and Windows for the shipped-runtime PR head.
 
 **Dependencies:** Tasks 23-30
 
@@ -1535,15 +1530,21 @@ on T029-T030 and the required remote Ubuntu/Windows CI proof is still missing.
 
 ## Checkpoint: After Tasks 29-31
 
-- [ ] Cross-platform claims are backed by tests or CI.
-- [ ] Package smoke covers installed-bin behavior.
-- [ ] Public docs and contract tests describe the same shipped runtime.
-- [ ] Future command: `rtk npm run ci`.
+- [x] Cross-platform claims are backed by tests or CI.
+- [x] Package smoke covers installed-bin behavior.
+- [x] Public docs and contract tests describe the same shipped runtime.
+- [x] Future command: `rtk npm run ci`.
+
+**Checkpoint evidence:** Fresh local `rtk npm run ci` passed after T029-T031.
+GitHub Actions CI run `27370403532` passed for
+`5b073dc04ca1e7e7ed4550e784f96831e91468c4` on both `ubuntu-latest` and
+`windows-latest`, covering fake-`mimo` integration, package smoke, docs
+contract tests, runtime tests, typecheck, and format.
 
 ## Final Readiness Gate
 
 - [x] `rtk npm run ci` passes locally.
-- [ ] Ubuntu and native Windows CI pass with the fake-`mimo` integration path.
+- [x] Ubuntu and native Windows CI pass with the fake-`mimo` integration path.
 - [x] Focused fake-`mimo` smoke covers user scope, project scope, rerun
       idempotence, rollback after failed verification, durable success plus
       current-session block, JSON output, and redaction.
@@ -1562,6 +1563,8 @@ on T029-T030 and the required remote Ubuntu/Windows CI proof is still missing.
       managed secret path, and no `provider.gonkagate.options.apiKey`.
 
 **Final gate evidence:** Local `rtk npm run ci` passed after the validated Kimi
-promotion. `scripts/live-mimocode-validation.mjs` is a separate gated live
-validation helper and is not part of default CI. The remaining final gate gap is
-remote GitHub Actions evidence for the Ubuntu and native Windows matrix.
+promotion and after Windows CI fixes. `scripts/live-mimocode-validation.mjs` is
+a separate gated live validation helper and is not part of default CI. GitHub
+Actions CI run `27370403532` passed for
+`5b073dc04ca1e7e7ed4550e784f96831e91468c4` on both Ubuntu and native Windows,
+covering the required fake-`mimo` integration path and package smoke.
