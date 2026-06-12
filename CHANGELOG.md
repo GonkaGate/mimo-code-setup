@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.1](https://github.com/GonkaGate/mimo-code-setup/compare/v0.3.0...v0.3.1) (2026-06-12)
+
+
+### Bug Fixes
+
+* mask interactive GonkaGate API key prompt ([395348d](https://github.com/GonkaGate/mimo-code-setup/commit/395348d28bae8946b9a562883eef996253f80a72))
+* mask interactive GonkaGate API key prompt ([5f22bac](https://github.com/GonkaGate/mimo-code-setup/commit/5f22bac1306ef3b086dc9fd4ac714ca3a6f72d0f))
+
 ## [0.3.0](https://github.com/GonkaGate/mimo-code-setup/compare/v0.2.0...v0.3.0) (2026-06-11)
 
 
