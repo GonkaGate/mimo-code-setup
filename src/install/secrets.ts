@@ -25,7 +25,7 @@ export async function collectGonkaGateApiKey(
 
   if (deps.streams.stdin.isTTY === true && deps.streams.stdout.isTTY === true) {
     return validateSecret(
-      await deps.prompts.password("GonkaGate API key"),
+      await deps.prompts.password("GonkaGate API key", { mask: true }),
       "prompt",
     );
   }
@@ -34,7 +34,7 @@ export async function collectGonkaGateApiKey(
     category: "secret_intake",
     code: "non_interactive_secret_required",
     message:
-      "A GonkaGate API key is required. Use a hidden prompt, GONKAGATE_API_KEY, or --api-key-stdin.",
+      "A GonkaGate API key is required. Use a masked prompt, GONKAGATE_API_KEY, or --api-key-stdin.",
   });
 }
 

@@ -7,6 +7,7 @@ import type {
   HttpJsonRequest,
   HttpJsonResponse,
   InstallerDeps,
+  PasswordPromptOptions,
 } from "../../src/install/deps.js";
 import { createNodeFileSystem } from "../../src/install/deps.js";
 
@@ -25,6 +26,7 @@ export interface TestDeps extends InstallerDeps {
   cleanup(): void;
   commandLog: RecordedCommand[];
   httpLog: RecordedHttpRequest[];
+  passwordPromptLog: PasswordPromptOptions[];
   queueCommand(result: CommandExecutionResult): void;
   queueHttpResponse(result: HttpJsonResponse): void;
   queuePrompt(value: string): void;
@@ -43,6 +45,7 @@ export function createTestDeps(): TestDeps {
   const commandLog: RecordedCommand[] = [];
   const httpResults: HttpJsonResponse[] = [];
   const httpLog: RecordedHttpRequest[] = [];
+  const passwordPromptLog: PasswordPromptOptions[] = [];
   const promptValues: string[] = [];
 
   const deps: TestDeps = {
@@ -80,9 +83,11 @@ export function createTestDeps(): TestDeps {
       },
     },
     httpLog,
+    passwordPromptLog,
     platform: process.platform,
     prompts: {
-      async password() {
+      async password(_message, options) {
+        passwordPromptLog.push(options ?? {});
         return promptValues.shift() ?? "";
       },
       async select(_message, choices) {

@@ -8,7 +8,7 @@ catalog fetch, managed storage, and diagnostics.
 
 Allowed future inputs:
 
-- hidden interactive prompt
+- masked interactive prompt
 - `GONKAGATE_API_KEY`
 - `--api-key-stdin`
 

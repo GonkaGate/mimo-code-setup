@@ -38,6 +38,7 @@
   default
 - live GonkaGate `/v1/models` catalog fetch after safe API-key intake, with
   every returned model written into `provider.gonkagate.models`
+- masked interactive GonkaGate API-key prompt
 
 ## [0.1.0] - 2026-06-11
 

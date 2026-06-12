@@ -13,7 +13,7 @@ a hardcoded allowlist.
 2. Resolve safe config and state paths without mutating shell profiles or `.env`
    files.
 3. Collect a GonkaGate API key through safe inputs only:
-   `GONKAGATE_API_KEY`, hidden interactive prompt, or `--api-key-stdin`.
+   `GONKAGATE_API_KEY`, masked interactive prompt, or `--api-key-stdin`.
 4. Fetch `https://api.gonkagate.com/v1/models` with Bearer auth and build the
    setup picker from every returned model id.
 5. Store the secret under `~/.gonkagate/mimo-code/api-key`.
