@@ -76,8 +76,12 @@ export interface FileSystem {
   ): Promise<void>;
 }
 
+export interface PasswordPromptOptions {
+  mask?: boolean | string;
+}
+
 export interface PromptAdapter {
-  password(message: string): Promise<string>;
+  password(message: string, options?: PasswordPromptOptions): Promise<string>;
   select<TValue extends string>(
     message: string,
     choices: readonly { name: string; value: TValue }[],
@@ -115,7 +119,8 @@ export function createNodeDeps(): InstallerDeps {
     http: createNodeHttpClient(),
     platform: process.platform,
     prompts: {
-      password: (message) => password({ message }),
+      password: (message, options) =>
+        password({ mask: options?.mask, message }),
       select: (message, choices) => select({ choices: [...choices], message }),
     },
     readStdin: () => readStreamText(process.stdin),

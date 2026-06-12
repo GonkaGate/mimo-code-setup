@@ -22,11 +22,12 @@ test("secret intake accepts env and stdin without depending on durable env runti
   stdinDeps.cleanup();
 });
 
-test("secret intake uses hidden prompt only for interactive TTYs", async () => {
+test("secret intake uses masked prompt only for interactive TTYs", async () => {
   const deps = createTestDeps();
   deps.queuePrompt("gp-prompt-secret");
   const result = await collectGonkaGateApiKey({}, deps);
   assert.deepEqual(result, { key: "gp-prompt-secret", source: "prompt" });
+  assert.deepEqual(deps.passwordPromptLog, [{ mask: true }]);
   deps.cleanup();
 
   const nonInteractive = createTestDeps();

@@ -50,7 +50,7 @@ npx @gonkagate/mimo-code-setup
 The happy path is:
 
 1. The CLI checks that `mimo` is installed and supported.
-2. It asks for your GonkaGate API key in a hidden prompt.
+2. It asks for your GonkaGate API key in a masked prompt.
 3. It calls `GET /v1/models` and offers every model returned by GonkaGate.
 4. It asks whether GonkaGate should be activated for `user` or `project`
    scope.
@@ -106,7 +106,7 @@ npx @gonkagate/mimo-code-setup
 Under the hood, the shipped runtime:
 
 - validates local `mimo`
-- accepts the secret only through a hidden prompt, `GONKAGATE_API_KEY`, or
+- accepts the secret only through a masked prompt, `GONKAGATE_API_KEY`, or
   `--api-key-stdin`
 - fetches the live GonkaGate model catalog from
   `https://api.gonkagate.com/v1/models`
@@ -144,7 +144,7 @@ default and must not contain the secret or the secret file path.
 
 Safe secret inputs:
 
-- hidden interactive prompt
+- masked interactive prompt
 - `GONKAGATE_API_KEY`
 - `--api-key-stdin`
 

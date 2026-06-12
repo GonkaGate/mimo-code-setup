@@ -33,7 +33,7 @@ Include a repository constraint only when it changes the task:
 - project activation target is `.mimocode/mimocode.json`
 - the managed provider key is `provider.gonkagate`
 - project scope should write only activation settings
-- safe secret inputs are hidden prompt, `GONKAGATE_API_KEY`, or
+- safe secret inputs are masked prompt, `GONKAGATE_API_KEY`, or
   `--api-key-stdin`
 - plain `--api-key` is intentionally unsupported
 - secrets should stay under `~/.gonkagate/mimo-code/...`, not inside the

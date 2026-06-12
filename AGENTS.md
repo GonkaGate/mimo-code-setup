@@ -47,7 +47,7 @@ The intended happy path is:
 
 1. user runs `npx @gonkagate/mimo-code-setup`
 2. installer validates local `mimo`
-3. installer collects a GonkaGate `gp-...` key through a hidden prompt,
+3. installer collects a GonkaGate `gp-...` key through a masked prompt,
    `GONKAGATE_API_KEY`, or `--api-key-stdin`
 4. installer calls `GET /v1/models` with that key and offers all returned
    GonkaGate models

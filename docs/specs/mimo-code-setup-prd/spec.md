@@ -81,7 +81,7 @@ The tool:
 1. validates local `mimo`
 2. verifies that the installed MiMoCode version is supported or clearly reports
    that it is newer than the last audited baseline
-3. accepts a GonkaGate API key through a hidden prompt, `GONKAGATE_API_KEY`, or
+3. accepts a GonkaGate API key through a masked prompt, `GONKAGATE_API_KEY`, or
    `--api-key-stdin`
 4. calls `GET /v1/models` with that key and offers every returned GonkaGate
    model id
@@ -124,7 +124,7 @@ Contributor user:
 - one public npm package: `@gonkagate/mimo-code-setup`
 - one public repository: `GonkaGate/mimo-code-setup`
 - configuration of already installed local MiMoCode
-- hidden or automation-safe secret input
+- masked or automation-safe secret input
 - installer-owned managed secret file
 - live GonkaGate model picker backed by `GET /v1/models`
 - `user` and `project` setup scope
@@ -237,7 +237,7 @@ security docs, and the PRD whenever it changes.
 
 Allowed:
 
-- hidden interactive prompt
+- masked interactive prompt
 - `GONKAGATE_API_KEY`
 - `--api-key-stdin`
 

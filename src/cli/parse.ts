@@ -38,7 +38,7 @@ function createProgram(): Command {
         `Base URL: ${GONKAGATE_BASE_URL}`,
         `Provider package: ${CURRENT_PROVIDER_PACKAGE}`,
         `Secret binding: ${MANAGED_SECRET_FILE_REF}`,
-        "Safe secret inputs: hidden prompt, GONKAGATE_API_KEY, --api-key-stdin",
+        "Safe secret inputs: masked prompt, GONKAGATE_API_KEY, --api-key-stdin",
       ].join("\n"),
     );
 
@@ -48,7 +48,7 @@ function createProgram(): Command {
 export function parseCliOptions(argv: readonly string[]): CliOptions {
   if (argv.some((arg) => arg === "--api-key" || arg.startsWith("--api-key="))) {
     throw new Error(
-      "Plain --api-key is not supported. Use a hidden prompt, GONKAGATE_API_KEY, or --api-key-stdin.",
+      "Plain --api-key is not supported. Use a masked prompt, GONKAGATE_API_KEY, or --api-key-stdin.",
     );
   }
 
