@@ -1,6 +1,6 @@
 {
   "name": "@gonkagate/mimo-code-setup",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Onboarding CLI runtime for configuring MiMoCode to use GonkaGate as a custom provider.",
   "homepage": "https://github.com/GonkaGate/mimo-code-setup#readme",
   "bugs": {
