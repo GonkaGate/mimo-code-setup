@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.2](https://github.com/GonkaGate/mimo-code-setup/compare/v0.3.1...v0.3.2) (2026-06-13)
+
+
+### Bug Fixes
+
+* report managed storage blockers without cwd fallback ([fb5c1c9](https://github.com/GonkaGate/mimo-code-setup/commit/fb5c1c9fd78520bee103f6a2ddc4eedeb4635906))
+* report managed storage blockers without cwd fallback ([b90dab7](https://github.com/GonkaGate/mimo-code-setup/commit/b90dab78445baa889732f5c5aafa8aa0edf7aa41))
+
 ## [0.3.1](https://github.com/GonkaGate/mimo-code-setup/compare/v0.3.0...v0.3.1) (2026-06-12)
 
 
