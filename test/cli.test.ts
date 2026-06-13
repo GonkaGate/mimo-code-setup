@@ -217,7 +217,7 @@ test("CLI can render JSON success and human Next command with injected registry"
   }
 });
 
-test("CLI JSON renders failed and unexpected-error outcomes without secrets", async () => {
+test("CLI JSON renders failed and storage-blocker outcomes without secrets", async () => {
   const failedDeps = createTestDeps();
   failedDeps.setCwd(`${failedDeps.root}/project`);
   failedDeps.setEnv({
@@ -256,35 +256,36 @@ test("CLI JSON renders failed and unexpected-error outcomes without secrets", as
     failedDeps.cleanup();
   }
 
-  const unexpectedDeps = createTestDeps();
-  unexpectedDeps.setCwd(`${unexpectedDeps.root}/project`);
-  unexpectedDeps.setEnv({ GONKAGATE_API_KEY: "gp-secret-value" });
-  unexpectedDeps.queueCommand({
+  const storageDeps = createTestDeps();
+  storageDeps.setCwd(`${storageDeps.root}/project`);
+  storageDeps.setEnv({ GONKAGATE_API_KEY: "gp-secret-value" });
+  storageDeps.queueCommand({
     exitCode: 0,
     stderr: "",
     stdout: "mimo 0.1.0\n",
   });
-  unexpectedDeps.queueCommand({
+  storageDeps.queueCommand({
     exitCode: 0,
     stderr: "",
     stdout: JSON.stringify({
-      config: `${unexpectedDeps.root}/project/.config/mimocode`,
+      config: `${storageDeps.root}/project/.config/mimocode`,
     }),
   });
   try {
     const stdout = createBufferWriter();
     const result = await run(
       ["--yes", "--scope", "user", "--model", "alpha", "--json"],
-      { deps: unexpectedDeps, registry: validatedRegistry, stdout },
+      { deps: storageDeps, registry: validatedRegistry, stdout },
     );
     const parsed = JSON.parse(stdout.contents) as {
       status: string;
       errorCode: string;
     };
-    assert.equal(result.status, "failed");
-    assert.equal(parsed.status, "failed");
-    assert.equal(parsed.errorCode, "unexpected_error");
+    assert.equal(result.status, "blocked");
+    assert.equal(parsed.status, "blocked");
+    assert.equal(parsed.errorCode, "secret_storage_failed");
+    assert.doesNotMatch(stdout.contents, /gp-secret-value/);
   } finally {
-    unexpectedDeps.cleanup();
+    storageDeps.cleanup();
   }
 });

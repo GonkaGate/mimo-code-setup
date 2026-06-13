@@ -16,6 +16,15 @@ npm run ci
 If `npm run package:check` fails, inspect `package.json`, `bin/`, and `dist/`
 after running `npm run build`.
 
+## Managed Storage Blockers
+
+If setup reports `secret_storage_failed` with
+`Managed secret and state files must not be repository-local.`, check the
+launch environment. `HOME` on POSIX/WSL or `USERPROFILE` on native Windows must
+point to the user's real profile directory, not to the current repository. The
+installer intentionally stops instead of writing the GonkaGate API key or
+install state into a project-local path.
+
 ## Future Runtime Blockers
 
 The implemented installer should report blockers for:

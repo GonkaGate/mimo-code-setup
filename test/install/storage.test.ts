@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { join } from "node:path";
 import test from "node:test";
-import { resolveManagedPaths } from "../../src/install/managed-files.js";
+import {
+  resolveManagedHomeDir,
+  resolveManagedPaths,
+} from "../../src/install/managed-files.js";
 import {
   verifyManagedSecret,
   writeManagedSecret,
@@ -64,25 +67,64 @@ test("managed secret storage repairs POSIX permissions without rewriting unchang
 test("managed secret storage rejects repository-local and out-of-profile Windows paths", async () => {
   const repoLocal = createTestDeps();
   const projectRoot = join(repoLocal.root, "project");
-  await assert.rejects(() =>
-    writeManagedSecret(repoLocal, "gp-secret-value", {
-      homeDir: projectRoot,
-      platform: "posix",
-      projectRoot,
-    }),
+  await assert.rejects(
+    () =>
+      writeManagedSecret(repoLocal, "gp-secret-value", {
+        homeDir: projectRoot,
+        platform: "posix",
+        projectRoot,
+      }),
+    {
+      code: "secret_storage_failed",
+      message: "Managed secret and state files must not be repository-local.",
+      name: "InstallerError",
+    },
+  );
+  await assert.rejects(
+    () =>
+      writeManagedSecret(repoLocal, "gp-secret-value", {
+        homeDir: join(projectRoot, "..managed"),
+        platform: "posix",
+        projectRoot,
+      }),
+    {
+      code: "secret_storage_failed",
+      message: "Managed secret and state files must not be repository-local.",
+      name: "InstallerError",
+    },
   );
   repoLocal.cleanup();
 
   const windows = createTestDeps();
   const managed = resolveManagedPaths("D:/OtherUser");
   assert.match(managed.secretPath, /api-key/);
-  await assert.rejects(() =>
-    writeManagedSecret(windows, "gp-secret-value", {
-      homeDir: "D:/OtherUser",
-      platform: "windows",
-      projectRoot: "C:/repo",
-      userProfile: "C:/Users/Current",
-    }),
+  await assert.rejects(
+    () =>
+      writeManagedSecret(windows, "gp-secret-value", {
+        homeDir: "D:/OtherUser",
+        platform: "windows",
+        projectRoot: "C:/repo",
+        userProfile: "C:/Users/Current",
+      }),
+    {
+      code: "secret_storage_failed",
+      message:
+        "Managed Windows files must stay inside the current user profile.",
+      name: "InstallerError",
+    },
   );
   windows.cleanup();
+});
+
+test("managed secret storage rejects missing profile home before falling back to cwd", () => {
+  assert.equal(
+    resolveManagedHomeDir({ HOME: "", USERPROFILE: "C:/Users/Current" }),
+    "C:/Users/Current",
+  );
+  assert.throws(() => resolveManagedHomeDir({}), {
+    code: "secret_storage_failed",
+    message:
+      "Cannot resolve GonkaGate managed storage without HOME or USERPROFILE.",
+    name: "InstallerError",
+  });
 });

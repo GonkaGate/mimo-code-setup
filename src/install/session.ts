@@ -10,7 +10,7 @@ import type { InstallerDeps } from "./deps.js";
 import { toInstallerError } from "./errors.js";
 import { detectMimoCode } from "./mimocode.js";
 import { fetchGonkaGateModelCatalog } from "./model-catalog.js";
-import { resolveManagedPaths } from "./managed-files.js";
+import { resolveManagedHomeDir, resolveManagedPaths } from "./managed-files.js";
 import {
   resolveMimoGlobalPaths,
   resolveProjectRoot,
@@ -63,10 +63,7 @@ export async function runInstallSession(
       effectiveDeps,
       effectiveDeps.cwd(),
     );
-    const homeDir =
-      effectiveDeps.env().HOME ??
-      effectiveDeps.env().USERPROFILE ??
-      effectiveDeps.cwd();
+    const homeDir = resolveManagedHomeDir(effectiveDeps.env());
     const managedPaths = resolveManagedPaths(homeDir);
     const secret = await collectGonkaGateApiKey(
       { apiKeyStdin: request.apiKeyStdin },
@@ -254,7 +251,9 @@ export async function runInstallSession(
               ? "model_registry"
               : installerError.category === "secret_intake"
                 ? "secret"
-                : "cli",
+                : installerError.category === "storage"
+                  ? "storage"
+                  : "cli",
         },
       ],
       errorCode: installerError.code,
