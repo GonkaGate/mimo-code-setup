@@ -87,6 +87,7 @@ export type InstallerErrorCategory =
   | "detection"
   | "version"
   | "secret_intake"
+  | "storage"
   | "config_parse"
   | "config_write"
   | "rollback"
