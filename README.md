@@ -18,6 +18,14 @@ npx @gonkagate/mimo-code-setup
 [![X](https://img.shields.io/badge/X-%40gonkagate-000000?style=flat-square&logo=x&logoColor=white)](https://x.com/gonkagate)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-GonkaGate-0A66C2?style=flat-square&logo=linkedin&logoColor=white)](https://www.linkedin.com/company/gonkagate)
 
+## See It In Action
+
+From API key to a verified `mimo` setup in one short walkthrough:
+
+[![See the installer in action](https://raw.githubusercontent.com/GonkaGate/mimo-code-setup/main/.github/assets/gonkagate-mimo-code-setup-demo.gif)](https://raw.githubusercontent.com/GonkaGate/mimo-code-setup/main/.github/assets/gonkagate-mimo-code-setup-demo.mp4)
+
+Need an API key first? [Get one on GonkaGate](https://gonkagate.com/en/register).
+
 ## Overview
 
 `@gonkagate/mimo-code-setup` is the onboarding CLI for people who already use
