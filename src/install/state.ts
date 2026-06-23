@@ -9,29 +9,33 @@ import type { InstallState } from "./contracts/install-state.js";
 export function createInstallState(
   input: Omit<
     InstallState,
-    | "auditedMimoCodeBaseline"
     | "installerVersion"
+    | "mimoCodeMinimumVersion"
     | "providerPackage"
     | "transport"
   >,
 ): InstallState {
   return {
     ...input,
-    auditedMimoCodeBaseline: CONTRACT_METADATA.verifiedMimoCode.minVersion,
     installerVersion: CONTRACT_METADATA.cliVersion,
+    mimoCodeMinimumVersion: CONTRACT_METADATA.mimoCode.minVersion,
     providerPackage: CURRENT_PROVIDER_PACKAGE,
     transport: CURRENT_TRANSPORT,
   };
 }
 
 export function parseInstallState(contents: string): InstallState {
-  const parsed = JSON.parse(contents) as Partial<InstallState>;
+  const parsed = JSON.parse(contents) as Partial<InstallState> & {
+    auditedMimoCodeBaseline?: string;
+  };
+  parsed.mimoCodeMinimumVersion ??= parsed.auditedMimoCodeBaseline;
+  delete parsed.auditedMimoCodeBaseline;
 
   const requiredStrings: readonly (keyof InstallState)[] = [
-    "auditedMimoCodeBaseline",
     "globalConfigTarget",
     "installerVersion",
     "lastDurableSetupAt",
+    "mimoCodeMinimumVersion",
     "mimoCodeVersion",
     "providerPackage",
     "scope",

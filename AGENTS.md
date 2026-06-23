@@ -23,7 +23,7 @@ Current honest state:
 - package metadata, TypeScript build, CI workflows, release scaffolding,
   mirrored skills, and contract tests are present
 - the latest compatibility audit found no hard blocker in official MiMoCode
-  `@mimo-ai/cli` `0.1.0` for the planned `provider.gonkagate` shape, but
+  `@mimo-ai/cli` releases for the planned `provider.gonkagate` shape, but
   runtime implementation must honor MiMoCode-specific config precedence and
   full-slug model keys
 - `src/cli.ts` is a thin entrypoint over split CLI seams and now calls the
@@ -34,12 +34,12 @@ Current honest state:
   `GET https://api.gonkagate.com/v1/models`, and writes every returned model
   into `provider.gonkagate.models`
 - `moonshotai/kimi-k2.6` has MiMoCode validation proof for the current
-  `@mimo-ai/cli` `0.1.0` baseline, but the public picker is now backed by the
-  live GonkaGate model catalog rather than a hardcoded validated allowlist
+  minimum-supported MiMoCode contract, but the public picker is now backed by
+  the live GonkaGate model catalog rather than a hardcoded validated allowlist
 
 If implementation status, package name, security flow, config locations,
-transport contract, or verified MiMoCode baseline changes, this file must be
-updated immediately so it stays truthful.
+transport contract, or minimum supported MiMoCode version changes, this file
+must be updated immediately so it stays truthful.
 
 ## Product Goal
 
@@ -77,7 +77,8 @@ change.
   rename
 - target CLI: `mimo`
 - target upstream package: `@mimo-ai/cli`
-- current verified MiMoCode baseline: minimum `0.1.0`, audited on 2026-06-11
+- minimum supported MiMoCode version: `0.1.0`; newer versions must not be
+  blocked solely because they are newer
 - documented global config example: `~/.config/mimocode/mimocode.json`
 - actual global config target must be resolved from MiMoCode paths and existing
   `mimocode.jsonc`, `mimocode.json`, or `config.json` files; create
@@ -142,7 +143,7 @@ This repo currently does:
 - define the product contract for the MiMoCode setup tool
 - provide npm packaging, CI, release-please, and publish scaffolding
 - provide a public CLI entrypoint that can configure MiMoCode when the local
-  `mimo` baseline, secret input, live model-catalog fetch, and
+  `mimo` minimum-version check, secret input, live model-catalog fetch, and
   effective-config verification pass
 - provide docs and tests that protect the current runtime contract
 - provide mirrored local skills for repo-aware agent work

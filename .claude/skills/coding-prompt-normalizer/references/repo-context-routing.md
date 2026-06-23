@@ -11,9 +11,10 @@ points.
 - The downstream agent already works inside this repository.
 - Do not explain how to inspect files, edit code, create folders, or run
   ordinary repo commands.
-- `mimo-code-setup` is a TypeScript/Node scaffold for a future installer that
-  will configure local MiMoCode to use GonkaGate.
-- Canonical surfaces today are `src/cli.ts`, `src/constants/`,
+- `mimo-code-setup` is a TypeScript/Node installer that configures local
+  MiMoCode to use GonkaGate.
+- Canonical surfaces today are `src/cli.ts`, `src/cli/`, `src/install/`,
+  `src/constants/`,
   `README.md`, `AGENTS.md`, `docs/`, `test/package-contract.test.ts`,
   `test/docs-contract.test.ts`, `test/skills-contract.test.ts`,
   `scripts/run-tests.mjs`, `.github/workflows/`, `package.json`,
@@ -27,8 +28,10 @@ points.
 
 Include a repository constraint only when it changes the task:
 
-- the target public UX is `npx @gonkagate/mimo-code-setup`, and the current CLI
-  intentionally reports `not_implemented`
+- the target public UX is `npx @gonkagate/mimo-code-setup`, wired to the
+  installer runtime
+- the minimum supported upstream MiMoCode version is `@mimo-ai/cli` `0.1.0`;
+  newer MiMoCode versions must not be blocked solely because they are newer
 - user-level config target is `~/.config/mimocode/mimocode.json`
 - project activation target is `.mimocode/mimocode.json`
 - the managed provider key is `provider.gonkagate`

@@ -23,15 +23,16 @@ execution.
 
 Be honest about the current state of the repository:
 
-- this repo has a scaffolded `npx @gonkagate/mimo-code-setup` public entrypoint;
-  the installer runtime is not implemented yet
-- `README.md`, `AGENTS.md`, `docs/`, `src/cli.ts`, `src/constants/`, and the
-  PRD are the main product-contract surfaces today
-- the public CLI intentionally reports `not_implemented`; it does not validate
-  local `mimo`, collect secrets, write config, or verify effective config yet
-- `src/install/` does not exist yet unless a later task explicitly creates it
-- the current verified MiMoCode baseline is `@mimo-ai/cli` `0.1.0` as of
-  June 11, 2026
+- this repo has a public `npx @gonkagate/mimo-code-setup` entrypoint wired to
+  the installer runtime
+- `README.md`, `AGENTS.md`, `docs/`, `src/cli.ts`, `src/cli/`,
+  `src/install/`, `src/constants/`, and the PRD are the main product-contract
+  surfaces today
+- the public CLI validates local `mimo`, collects the GonkaGate key safely,
+  fetches the live model catalog, writes MiMoCode config, and verifies
+  effective config when prerequisites pass
+- the minimum supported upstream MiMoCode version is `@mimo-ai/cli` `0.1.0`;
+  newer MiMoCode versions must not be blocked solely because they are newer
 
 Do not normalize a prompt into a fake implementation brief for files or
 behaviors that do not exist unless the user is explicitly asking to create
@@ -235,8 +236,8 @@ Do not force all sections when `1-2` focused paragraphs do the job better.
   checks, or specific workflow checks. Do not default to broad repo-wide
   validation unless the change is broad.
 - Do not repeat repo-wide instructions unless they materially affect this task.
-- Use the existing `src/` surfaces when they are materially relevant, and do
-  not mention `src/install/` as existing until the runtime is implemented.
+- Use the existing `src/` and `src/install/` surfaces when they are materially
+  relevant.
 - When the task touches a mirrored local skill, prefer keeping the `.claude`
   and `.agents` copies aligned unless the request says otherwise.
 - Do not propose product changes like `.env` writing, shell profile edits,
@@ -269,9 +270,9 @@ exact literal, removing stale Codex-specific wording, and keeping the mirrored
 `.agents` copy aligned.
 
 Relevant repository context
-- This repository has a scaffolded `npx @gonkagate/mimo-code-setup` entrypoint
-  that reports `not_implemented`, so prompt assets should not claim real
-  runtime behavior before `src/install/` exists.
+- This repository has a public `npx @gonkagate/mimo-code-setup` entrypoint
+  wired to the installer runtime, including safe secret intake, live catalog
+  fetch, config writes, and effective-config verification.
 - Local agent-support assets are mirrored under `.claude/skills/` and
   `.agents/skills/`; changes to one copy should normally be reflected in the
   other.
@@ -318,8 +319,9 @@ Perform a read-only truthfulness review of the current public product docs,
 with findings first and ordered by severity.
 
 Relevant repository context
-- This repository does not ship an implemented MiMoCode installer yet, so docs
-  should distinguish scaffolded behavior from future product plans.
+- This repository ships an implemented MiMoCode installer runtime, so docs
+  should describe implemented behavior accurately instead of scaffold-only
+  plans.
 - `README.md` and `docs/how-it-works.md` are the main contract surfaces for
   the `npx @gonkagate/mimo-code-setup` flow.
 - `chat_completions` is part of the current transport contract and should be

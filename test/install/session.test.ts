@@ -70,7 +70,7 @@ function queueSuccessfulCommands(
   deps: ReturnType<typeof createTestDeps>,
   configDir: string,
 ) {
-  deps.queueCommand({ exitCode: 0, stderr: "", stdout: "mimo 0.1.0\n" });
+  deps.queueCommand({ exitCode: 0, stderr: "", stdout: "mimo 0.1.2\n" });
   deps.queueCommand({
     exitCode: 0,
     stderr: "",
@@ -85,7 +85,7 @@ function queueSuccessfulLiveCommands(
   deps: ReturnType<typeof createTestDeps>,
   configDir: string,
 ) {
-  deps.queueCommand({ exitCode: 0, stderr: "", stdout: "mimo 0.1.0\n" });
+  deps.queueCommand({ exitCode: 0, stderr: "", stdout: "mimo 0.1.2\n" });
   deps.queueCommand({
     exitCode: 0,
     stderr: "",

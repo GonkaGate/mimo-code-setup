@@ -98,10 +98,10 @@ You need:
 - a GonkaGate API key in the usual `gp-...` format
   from [GonkaGate](https://gonkagate.com/en/register)
 
-Current MiMoCode baseline:
+Current MiMoCode compatibility floor:
 
-- minimum verified MiMoCode version: `0.1.0`
-- audited upstream package: `@mimo-ai/cli` `0.1.0` as of June 11, 2026
+- minimum supported MiMoCode version: `0.1.0`
+- newer MiMoCode versions are allowed and verified by the setup flow itself
 
 ## What The Installer Actually Changes
 

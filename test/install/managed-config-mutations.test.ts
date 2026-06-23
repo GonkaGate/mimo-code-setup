@@ -17,10 +17,10 @@ test("cleanup removes only installer-owned stale activation while preserving unr
   const updated = cleanupInstallerOwnedActivation(source, {
     currentModelKey: "current",
     installState: {
-      auditedMimoCodeBaseline: "0.1.0",
       globalConfigTarget: "/config",
       installerVersion: "0.1.0",
       lastDurableSetupAt: "2026-06-11T00:00:00.000Z",
+      mimoCodeMinimumVersion: "0.1.0",
       mimoCodeVersion: "0.1.0",
       previousManagedModelRef: "gonkagate/old",
       providerPackage: "@ai-sdk/openai-compatible",
