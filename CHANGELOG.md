@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.3](https://github.com/GonkaGate/mimo-code-setup/compare/v0.3.2...v0.3.3) (2026-06-23)
+
+
+### Bug Fixes
+
+* allow newer MiMoCode versions ([1601c6d](https://github.com/GonkaGate/mimo-code-setup/commit/1601c6d97f674f972efd539de6d34f44c0ff65c2))
+* allow newer MiMoCode versions ([8923907](https://github.com/GonkaGate/mimo-code-setup/commit/8923907c18bc10ca626ea09fcd44fa4e5d3c81ad))
+
 ## [0.3.2](https://github.com/GonkaGate/mimo-code-setup/compare/v0.3.1...v0.3.2) (2026-06-13)
 
 
