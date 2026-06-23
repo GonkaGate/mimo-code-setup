@@ -6,13 +6,13 @@ the MiMoCode workflow proof ledger.
 
 Current MiMoCode-validated workflow proof exists for:
 
-- `moonshotai/kimi-k2.6` - Kimi K2.6, 262K context.
+- `moonshotai/kimi-k2.6` - Kimi K2.6, 240K context.
 
 The current public GonkaGate models page also lists:
 
-- `minimaxai/minimax-m2.7` - MiniMax M2.7, 205K context.
+- `minimaxai/minimax-m2.7` - MiniMax M2.7, 180K context.
 - `qwen/qwen3-235b-a22b-instruct-2507-fp8` - Qwen3 235B A22B
-  Instruct 2507 FP8, 262K context.
+  Instruct 2507 FP8, 240K context.
 
 GonkaGate `/v1/models` availability is setup-catalog proof, not full MiMoCode
 workflow validation proof.

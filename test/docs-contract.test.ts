@@ -90,8 +90,8 @@ test("model validation docs separate live catalog availability from workflow pro
     /moonshotai\/kimi-k2\.6/,
     /minimaxai\/minimax-m2\.7/,
     /public GonkaGate models page/,
-    /262K context/,
-    /205K context/,
+    /240K context/,
+    /180K context/,
     /setCacheKey.*false/s,
     /mimo models gonkagate/,
   ]);
