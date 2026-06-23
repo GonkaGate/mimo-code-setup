@@ -115,7 +115,7 @@ test("constants pin the planned GonkaGate MiMoCode provider contract", () => {
     CONTRACT_METADATA.publicEntrypoint,
     "npx @gonkagate/mimo-code-setup",
   );
-  assert.equal(CONTRACT_METADATA.verifiedMimoCode.packageName, "@mimo-ai/cli");
+  assert.equal(CONTRACT_METADATA.mimoCode.packageName, "@mimo-ai/cli");
 });
 
 test("curated model registry is present but not falsely validated", () => {

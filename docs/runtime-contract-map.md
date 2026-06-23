@@ -9,7 +9,8 @@ When setup behavior changes from scaffold-only to implemented runtime behavior,
 update these surfaces together:
 
 - `AGENTS.md` - repository truth, product/security invariants, implementation
-  status, validation baseline, supported setup behavior, and validation command.
+  status, minimum MiMoCode version, supported setup behavior, and validation
+  command.
 - `README.md` - public status, npm entrypoint, runtime flow, supported flags,
   config targets, live model-catalog behavior, and local development checks.
 - `docs/how-it-works.md` - runtime architecture, scope behavior, config-layer
@@ -22,7 +23,7 @@ update these surfaces together:
   to paste raw `mimo --pure debug config` output.
 - `CHANGELOG.md` - meaningful user-facing runtime changes.
 - `src/constants/contract.ts` - package identity, public implementation status,
-  MiMoCode baseline, and live catalog source.
+  MiMoCode minimum version, and live catalog source.
 - `src/install/model-catalog.ts` - `/v1/models` fetch and response-shape
   boundary.
 - `src/constants/models.ts` - model metadata and validation helper types.

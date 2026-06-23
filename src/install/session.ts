@@ -51,9 +51,7 @@ export async function runInstallSession(
     request.cwd === undefined ? deps : { ...deps, cwd: () => request.cwd! };
 
   try {
-    const mimo = await detectMimoCode(effectiveDeps, {
-      newerVersionPolicy: "block",
-    });
+    const mimo = await detectMimoCode(effectiveDeps);
     const paths = await resolveMimoGlobalPaths(effectiveDeps);
     const target = await selectGlobalConfigTarget(
       effectiveDeps,

@@ -79,8 +79,8 @@ npx @gonkagate/mimo-code-setup
 The tool:
 
 1. validates local `mimo`
-2. verifies that the installed MiMoCode version is supported or clearly reports
-   that it is newer than the last audited baseline
+2. verifies that the installed MiMoCode version is not older than the minimum
+   supported version
 3. accepts a GonkaGate API key through a masked prompt, `GONKAGATE_API_KEY`, or
    `--api-key-stdin`
 4. calls `GET /v1/models` with that key and offers every returned GonkaGate
@@ -162,7 +162,8 @@ Contributor user:
 
 - the target CLI is `mimo`
 - the target package being configured is `@mimo-ai/cli`
-- the first audited upstream baseline is `@mimo-ai/cli` `0.1.0`
+- the minimum supported upstream version is `@mimo-ai/cli` `0.1.0`
+- newer MiMoCode versions must not be blocked solely because they are newer
 - MiMoCode global config defaults to the XDG config home under `mimocode`
 - `MIMOCODE_HOME` changes the config, data, state, and cache roots
 - MiMoCode global config candidates include `mimocode.jsonc`,
@@ -214,9 +215,9 @@ Contributor user:
 The package identity must not change if GonkaGate later migrates from
 chat-completions compatibility to responses support.
 
-### Verified MiMoCode Baseline
+### Minimum Supported MiMoCode Version
 
-The initial verified baseline is:
+The minimum supported MiMoCode version is:
 
 - `@mimo-ai/cli >= 0.1.0`
 
@@ -224,14 +225,12 @@ Installer behavior:
 
 - missing `mimo`: stop with MiMoCode install guidance
 - version lower than `0.1.0`: stop and request upgrade
-- version equal to `0.1.0`: continue
-- version newer than `0.1.0`: continue only if the implementation has an
-  explicit newer-version policy; otherwise report that the version is newer
-  than the last audited baseline and ask the user to upgrade this setup tool or
-  continue with a clearly labeled compatibility risk
+- version equal to or newer than `0.1.0`: continue
+- future MiMoCode versions are validated by the actual setup and effective-config
+  verification flow, not by a hardcoded audited-version ceiling
 
-The latest audited upstream MiMoCode baseline must be visible in README,
-security docs, and the PRD whenever it changes.
+The minimum supported MiMoCode version must be visible in README, security docs,
+and the PRD whenever it changes.
 
 ### Secret Inputs
 
@@ -313,7 +312,7 @@ per-user ACLs rather than claiming portable POSIX `chmod` behavior.
 - installer version
 - selected model key
 - selected scope
-- audited MiMoCode baseline
+- minimum supported MiMoCode version
 - selected MiMoCode version
 - selected transport contract
 - selected provider package
@@ -478,8 +477,8 @@ claims about richer MiMoCode behavior.
 ### Model Validation Proof
 
 A model may be documented as MiMoCode workflow-validated only after end-to-end
-verification against the current verified MiMoCode baseline for the workflows
-the product claims to support.
+verification against a named MiMoCode version for the workflows the product
+claims to support.
 
 Minimum validation proof for a GonkaGate model includes:
 

@@ -5,10 +5,10 @@ export type InstallerStatus = "success" | "blocked" | "failed";
 export type VerificationStatus = "passed" | "blocked" | "failed" | "skipped";
 
 export interface MimoCodeVersionInfo {
-  auditedBaseline: string;
   installedVersion: string;
+  minimumVersion: string;
   packageName: string;
-  policy: "audited" | "newer_blocked" | "newer_allowed_with_warning";
+  policy: "supported";
 }
 
 export interface ConfigTargets {
@@ -101,7 +101,6 @@ export type InstallerErrorCode =
   | "mimocode_not_found"
   | "mimocode_version_unparseable"
   | "mimocode_version_too_old"
-  | "mimocode_newer_than_audited"
   | "unsafe_api_key_flag"
   | "missing_api_key"
   | "invalid_api_key"

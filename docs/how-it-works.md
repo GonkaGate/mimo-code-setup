@@ -8,8 +8,8 @@ a hardcoded allowlist.
 
 ## Planned Flow
 
-1. Validate that the local `mimo` CLI is available and compatible with the
-   audited MiMoCode baseline.
+1. Validate that the local `mimo` CLI is available and not older than the
+   minimum supported MiMoCode version.
 2. Resolve safe config and state paths without mutating shell profiles or `.env`
    files.
 3. Collect a GonkaGate API key through safe inputs only:
@@ -24,7 +24,8 @@ a hardcoded allowlist.
 
 ## MiMoCode Surfaces
 
-The PRD is based on the MiMoCode upstream contract observed on 2026-06-11:
+The PRD is based on the MiMoCode upstream contract observed on 2026-06-11,
+with newer MiMoCode versions allowed by default:
 
 - CLI command: `mimo`
 - npm package: `@mimo-ai/cli`

@@ -88,10 +88,14 @@ test("the imported skill pack includes MiMoCode-aware high-value entries", () =>
     /--api-key-stdin/,
     /provider\.gonkagate/,
     /chat_completions/,
-    /not implemented yet/,
+    /src\/install\//,
+    /installer runtime/,
+    /minimum supported upstream MiMoCode version/,
+    /newer MiMoCode versions must not be blocked/,
   ]);
   assert.doesNotMatch(codingPromptNormalizer, /codex-setup/);
-  assert.doesNotMatch(codingPromptNormalizer, /shipped installer runtime/i);
+  assert.doesNotMatch(codingPromptNormalizer, /not_implemented/);
+  assert.doesNotMatch(codingPromptNormalizer, /not implemented yet/i);
 
   assertMatchesAll(codingPromptRepoRouting, [
     /mimo-code-setup/,

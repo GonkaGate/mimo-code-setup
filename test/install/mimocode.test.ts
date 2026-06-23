@@ -13,7 +13,7 @@ test("parseMimoVersion extracts semver from common --version output", () => {
   assert.equal(parseMimoVersion("not a version"), undefined);
 });
 
-test("detectMimoCode reports missing CLI, unparseable, old, exact, and newer versions", async () => {
+test("detectMimoCode reports missing CLI, unparseable, old, and supported versions", async () => {
   const missing = createTestDeps();
   missing.queueCommand({ exitCode: 127, stderr: "not found", stdout: "" });
   await assert.rejects(
@@ -55,37 +55,18 @@ test("detectMimoCode reports missing CLI, unparseable, old, exact, and newer ver
   exact.queueCommand({ exitCode: 0, stderr: "", stdout: "mimo 0.1.0\n" });
   const exactResult = await detectMimoCode(exact);
   assert.equal(exactResult.info.installedVersion, "0.1.0");
-  assert.equal(exactResult.info.policy, "audited");
+  assert.equal(exactResult.info.policy, "supported");
   exact.cleanup();
 
-  const newerBlocked = createTestDeps();
-  newerBlocked.queueCommand({
+  const newer = createTestDeps();
+  newer.queueCommand({
     exitCode: 0,
     stderr: "",
     stdout: "mimo 0.2.0\n",
   });
-  await assert.rejects(
-    () => detectMimoCode(newerBlocked),
-    (error) => {
-      assert.equal(
-        (error as InstallerError).code,
-        "mimocode_newer_than_audited",
-      );
-      return true;
-    },
-  );
-  newerBlocked.cleanup();
-
-  const newerAllowed = createTestDeps();
-  newerAllowed.queueCommand({
-    exitCode: 0,
-    stderr: "",
-    stdout: "mimo 0.2.0\n",
-  });
-  const newerAllowedResult = await detectMimoCode(newerAllowed, {
-    newerVersionPolicy: "allow_with_warning",
-  });
-  assert.equal(newerAllowedResult.info.policy, "newer_allowed_with_warning");
-  assert.equal(newerAllowedResult.warnings.length, 1);
-  newerAllowed.cleanup();
+  const newerResult = await detectMimoCode(newer);
+  assert.equal(newerResult.info.installedVersion, "0.2.0");
+  assert.equal(newerResult.info.policy, "supported");
+  assert.equal(newerResult.warnings.length, 0);
+  newer.cleanup();
 });

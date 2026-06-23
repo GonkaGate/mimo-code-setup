@@ -8,8 +8,7 @@ export const CONTRACT_METADATA = {
   publicEntrypoint: "npx @gonkagate/mimo-code-setup",
   publicState:
     "Installer runtime fetches the available GonkaGate model catalog from /v1/models after safe API-key intake.",
-  verifiedMimoCode: {
-    checkedAt: "2026-06-11",
+  mimoCode: {
     minVersion: "0.1.0",
     packageName: "@mimo-ai/cli",
   },
