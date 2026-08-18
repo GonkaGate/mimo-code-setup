@@ -12,14 +12,7 @@ import {
   MANAGED_SECRET_FILE_REF,
   TARGET_CLI,
 } from "../src/constants/gateway.js";
-import {
-  CURATED_MODEL_REGISTRY,
-  SUPPORTED_MODEL_KEYS,
-  type CuratedModelRegistry,
-  formatMimoCodeModelRef,
-  getRecommendedValidatedModel,
-  getValidatedModels,
-} from "../src/constants/models.js";
+import { formatMimoCodeModelRef } from "../src/constants/models.js";
 import { MODEL_VALIDATION_RECORDS } from "../src/constants/model-validation.js";
 import { readText } from "./contract-helpers.js";
 
@@ -118,53 +111,21 @@ test("constants pin the planned GonkaGate MiMoCode provider contract", () => {
   assert.equal(CONTRACT_METADATA.mimoCode.packageName, "@mimo-ai/cli");
 });
 
-test("curated model registry is present but not falsely validated", () => {
-  assert.deepEqual(SUPPORTED_MODEL_KEYS, [
-    "moonshotai/kimi-k2.6",
-    "minimaxai/minimax-m2.7",
-    "qwen/qwen3-235b-a22b-instruct-2507-fp8",
-  ]);
-  assert.equal(getValidatedModels().length, 1);
-  assert.equal(getRecommendedValidatedModel()?.key, "moonshotai/kimi-k2.6");
-  assert.equal(CONTRACT_METADATA.curatedRegistryPublished, true);
+test("model metadata constants keep no checked-in catalog", () => {
+  const modelConstants = readText("src/constants/models.ts");
 
-  for (const [key, model] of Object.entries(CURATED_MODEL_REGISTRY)) {
-    assert.equal(model.adapterPackage, "@ai-sdk/openai-compatible");
-    assert.equal(model.transport, "chat_completions");
-    if (key === "moonshotai/kimi-k2.6") {
-      assert.equal(model.validationStatus, "validated");
-      assert.equal(model.recommended, true);
-    } else {
-      assert.equal(model.validationStatus, "candidate");
-      assert.equal(model.recommended, false);
-    }
-  }
+  assert.doesNotMatch(modelConstants, /deepseek|kimi|minimax|qwen/i);
+  assert.doesNotMatch(modelConstants, /context:\s*\d/);
+  assert.doesNotMatch(modelConstants, /recommended/i);
+  assert.equal(
+    Object.keys(CONTRACT_METADATA).includes("curatedRegistry"),
+    false,
+  );
+  assert.match(CONTRACT_METADATA.publicState, /\/v1\/models/);
 
-  assert.equal(
-    CURATED_MODEL_REGISTRY["moonshotai/kimi-k2.6"].modelId,
-    "moonshotai/kimi-k2.6",
-  );
-  assert.equal(
-    CURATED_MODEL_REGISTRY["moonshotai/kimi-k2.6"].limits?.context,
-    262_000,
-  );
-  assert.equal(
-    CURATED_MODEL_REGISTRY["minimaxai/minimax-m2.7"].modelId,
-    "minimaxai/minimax-m2.7",
-  );
-  assert.equal(
-    CURATED_MODEL_REGISTRY["minimaxai/minimax-m2.7"].limits?.context,
-    205_000,
-  );
-  assert.equal(
-    CURATED_MODEL_REGISTRY["qwen/qwen3-235b-a22b-instruct-2507-fp8"].modelId,
-    "qwen/qwen3-235b-a22b-instruct-2507-fp8",
-  );
-  assert.equal(
-    CURATED_MODEL_REGISTRY["qwen/qwen3-235b-a22b-instruct-2507-fp8"].limits
-      ?.context,
-    262_000,
-  );
+  const catalog = readText("src/install/model-catalog.ts");
+  assert.match(catalog, /context_length/);
+  assert.match(catalog, /contextLength/);
 
   assert.equal(
     formatMimoCodeModelRef("moonshotai/kimi-k2.6"),
@@ -172,16 +133,14 @@ test("curated model registry is present but not falsely validated", () => {
   );
 });
 
-test("validated MiMoCode model registry entries require validation records", () => {
-  for (const [key, model] of Object.entries(
-    CURATED_MODEL_REGISTRY as CuratedModelRegistry,
-  )) {
-    if (model.validationStatus === "validated") {
-      assert.ok(
-        key in MODEL_VALIDATION_RECORDS,
-        `${key} is validated without a validation record`,
-      );
-    }
+test("the MiMoCode workflow proof ledger stays self-consistent", () => {
+  const records = Object.entries(MODEL_VALIDATION_RECORDS);
+  assert.ok(records.length > 0);
+
+  for (const [key, record] of records) {
+    assert.equal(record.modelKey, key);
+    assert.equal(record.providerPackage, "@ai-sdk/openai-compatible");
+    assert.equal(record.transport, "chat_completions");
   }
 
   const kimi = MODEL_VALIDATION_RECORDS["moonshotai/kimi-k2.6"];

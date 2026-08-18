@@ -24,9 +24,10 @@ update these surfaces together:
 - `CHANGELOG.md` - meaningful user-facing runtime changes.
 - `src/constants/contract.ts` - package identity, public implementation status,
   MiMoCode minimum version, and live catalog source.
-- `src/install/model-catalog.ts` - `/v1/models` fetch and response-shape
-  boundary.
-- `src/constants/models.ts` - model metadata and validation helper types.
+- `src/install/model-catalog.ts` - `/v1/models` fetch, response-shape boundary,
+  and the fallbacks for gateways that publish no per-model metadata.
+- `src/constants/models.ts` - runtime model shape types only; it must not carry
+  a checked-in catalog, context window, display name, or default model id.
 - `test/docs-contract.test.ts` and `test/package-contract.test.ts` - docs,
   constants, package metadata, and model registry agreement.
 - `test/cli.test.ts` - human and JSON CLI output semantics.

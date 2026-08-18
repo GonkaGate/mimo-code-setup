@@ -418,9 +418,9 @@ the actual `models` entries generated from GonkaGate `/v1/models`:
       },
       "models": {
         "<provider-slug>/<model-slug>": {
-          "name": "<display name>",
+          "name": "<live catalog name, or the model id>",
           "limit": {
-            "context": 0,
+            "context": "<live catalog context_length>",
             "output": 0
           }
         }
@@ -429,6 +429,11 @@ the actual `models` entries generated from GonkaGate `/v1/models`:
   }
 }
 ```
+
+`name` and `limit` are generated from the live `/v1/models` entry, never from
+a checked-in catalog. When the gateway does not publish `context_length` for a
+model, the installer writes no `limit` block for it at all and MiMoCode keeps
+its own default. Writing `"context": 0` would state a real but wrong limit.
 
 The installer should not write `provider.gonkagate.env` as a durable runtime
 dependency in v1. `GONKAGATE_API_KEY` is setup input, not the normal
@@ -456,13 +461,26 @@ Runtime model source:
 
 - endpoint: `GET https://api.gonkagate.com/v1/models`
 - auth: `Authorization: Bearer <gp-key>`
-- expected response shape: `{ "object": "list", "data": [{ "id": "..."}] }`
+- required response shape: `{ "object": "list", "data": [{ "id": "..."}] }`
 - setup keys: every returned `data[].id`
+- optional per-model metadata: `name`, `description`, `context_length`
 
-The installer must not hardcode the public setup model list. It should parse
-the authenticated `/v1/models` response, preserve the returned order, dedupe
-duplicate ids, and write every returned model id under
-`provider.gonkagate.models`.
+The installer must not hardcode the public setup model list, model display
+names, or model context windows. It should parse the authenticated
+`/v1/models` response, preserve the returned order, dedupe duplicate ids, and
+write every returned model id under `provider.gonkagate.models`.
+
+Optional metadata is a compatibility surface, not a requirement. A gateway that
+publishes only `id`, `object`, `created`, and `owned_by` must still complete
+setup, so each optional field may be absent, `null`, or unusable:
+
+- `name` absent -> the model id is the display name
+- `description` absent -> no description is shown in the picker
+- `context_length` absent -> no `limit` block is written for that model
+
+The default model for non-interactive setup is `data[0]`, the first entry of
+the live response in response order. The installer must not rank, sort, or
+prefer models on its own, and must not carry a checked-in default model id.
 
 Model ids must map cleanly to MiMoCode's `provider/model` model-ref format.
 Because MiMoCode treats the first slash segment as provider id and rejoins the
@@ -729,8 +747,8 @@ The setup tool must not depend on a future `gonkagate doctor`.
 7. Future responses migration must not require a new package identity.
 8. Interactive setup should fetch the live model catalog before showing the
    model picker.
-9. Safe non-interactive setup may accept recommended defaults only when the
-   installer has enough information to do so without ambiguity.
+9. Safe non-interactive setup selects the first model of the live `/v1/models`
+   response, so the gateway owns the default instead of the installer.
 10. Diagnostics must be actionable without exposing secrets.
 11. Validation proof must be narrow enough to run locally but broad enough to
     cover the claimed MiMoCode behavior.
@@ -741,7 +759,7 @@ The setup tool must not depend on a future `gonkagate doctor`.
 - native MiMoCode `auth.json` integration, if a later product decision chooses
   to use it
 - richer post-setup live GonkaGate session verification
-- richer live catalog metadata, if `/v1/models` starts returning it
+- live catalog metadata beyond `name`, `description`, and `context_length`
 - cheaper validated `small_model` strategy
 - MiMoCode model-group integration
 - future `/v1/responses` migration

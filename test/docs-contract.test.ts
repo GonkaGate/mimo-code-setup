@@ -86,14 +86,33 @@ test("model validation docs separate live catalog availability from workflow pro
   assertMatchesAll(modelValidation, [
     /not the public picker allowlist/i,
     /workflow proof ledger/i,
-    /qwen\/qwen3-235b-a22b-instruct-2507-fp8/,
     /moonshotai\/kimi-k2\.6/,
-    /minimaxai\/minimax-m2\.7/,
-    /public GonkaGate models page/,
-    /240K context/,
-    /180K context/,
+    /keeps no\s+copy of that catalog/s,
     /setCacheKey.*false/s,
     /mimo models gonkagate/,
+  ]);
+  assert.doesNotMatch(modelValidation, /\d+K context/);
+});
+
+test("docs describe live model metadata and its pre-metadata fallbacks", () => {
+  const howItWorks = readText("docs/how-it-works.md");
+  const readme = readText("README.md");
+  const agents = readText("AGENTS.md");
+
+  assertMatchesAll(howItWorks, [
+    /context_length/,
+    /no checked-in model catalog/,
+    /falls back to the model id/,
+    /writes no `limit` block/,
+  ]);
+  assertMatchesAll(readme, [
+    /ships no model catalog and no default model id/,
+    /first model of the live `\/v1\/models`\s+response/s,
+  ]);
+  assertMatchesAll(agents, [
+    /must never be checked in/,
+    /`data\[0\]` of the live response/,
+    /rather than a `0` limit/,
   ]);
 });
 

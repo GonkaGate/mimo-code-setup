@@ -59,7 +59,8 @@ The happy path is:
 
 1. The CLI checks that `mimo` is installed and supported.
 2. It asks for your GonkaGate API key in a masked prompt.
-3. It calls `GET /v1/models` and offers every model returned by GonkaGate.
+3. It calls `GET /v1/models` and offers every model returned by GonkaGate,
+   labelled with the live model name and description.
 4. It asks whether GonkaGate should be activated for `user` or `project`
    scope.
 5. It writes the managed config, verifies the result, and tells you to go back
@@ -88,6 +89,9 @@ printf '%s' "$GONKAGATE_API_KEY" | npx @gonkagate/mimo-code-setup --api-key-stdi
 If you run non-interactively, pass `--scope` or `--yes`. In a git repository,
 the recommended default is usually `project`; outside a repo, it is usually
 `user`.
+
+Without `--model`, `--yes` selects the first model of the live `/v1/models`
+response. GonkaGate owns that order, so the CLI ships no default model id.
 
 ## Before You Run It
 
@@ -182,13 +186,17 @@ The runtime is live-catalog-first:
 - the canonical base URL is `https://api.gonkagate.com/v1`
 - the setup model list is fetched from
   `https://api.gonkagate.com/v1/models` after safe API-key intake
+- model ids, display names, and context windows are read from that live
+  response; this repository ships no model catalog and no default model id
+- gateways that do not publish per-model metadata still work: the model id is
+  used as the display name and no context limit is written
 - the current provider package is `@ai-sdk/openai-compatible`
 - the current transport target is `chat_completions`
 - future migration should add `responses` support without renaming the product
 - the selected setup model remains the activation default through `model` and
   `small_model`
 - `provider.gonkagate.models` is generated from every model returned by
-  `/v1/models`
+  `/v1/models`, including the published context window when there is one
 - `docs/model-validation.md` tracks MiMoCode workflow proof separately from
   live catalog availability
 

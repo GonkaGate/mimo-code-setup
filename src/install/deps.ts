@@ -84,7 +84,11 @@ export interface PromptAdapter {
   password(message: string, options?: PasswordPromptOptions): Promise<string>;
   select<TValue extends string>(
     message: string,
-    choices: readonly { name: string; value: TValue }[],
+    choices: readonly {
+      description?: string;
+      name: string;
+      value: TValue;
+    }[],
   ): Promise<TValue>;
 }
 

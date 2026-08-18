@@ -1,8 +1,8 @@
 import { join } from "node:path";
 import {
-  createCuratedModelIndex,
+  createModelIndex,
   formatMimoCodeModelRef,
-  type CuratedModelRegistry,
+  type ModelRegistry,
 } from "../constants/models.js";
 import { GONKAGATE_PROVIDER_ID } from "../constants/gateway.js";
 import type { InstallerBlocker, InstallerResult } from "./contracts.js";
@@ -38,7 +38,7 @@ export interface InstallSessionRequest {
   apiKeyStdin?: boolean;
   cwd?: string;
   modelKey?: string;
-  registry?: CuratedModelRegistry;
+  registry?: ModelRegistry;
   scope?: "user" | "project";
   yes?: boolean;
 }
@@ -126,8 +126,7 @@ export async function runInstallSession(
       });
     }
 
-    const validatedModelKeys =
-      createCuratedModelIndex(registry).validatedModelKeys;
+    const validatedModelKeys = createModelIndex(registry).validatedModelKeys;
     const durableEffective = await verifyDurableEffectiveConfig(effectiveDeps, {
       modelKey: modelSelection.model.key,
       validatedModelKeys,

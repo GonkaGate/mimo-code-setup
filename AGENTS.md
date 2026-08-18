@@ -33,6 +33,12 @@ Current honest state:
 - the runtime collects the GonkaGate key before the model picker, calls
   `GET https://api.gonkagate.com/v1/models`, and writes every returned model
   into `provider.gonkagate.models`
+- model ids, display names, descriptions, context windows, and the default
+  model all come from that live response; the repository carries no model
+  catalog and no default model id
+- `name`, `description`, and `context_length` are optional on the wire, so a
+  gateway that returns only `id`, `object`, `created`, and `owned_by` still
+  completes setup
 - `moonshotai/kimi-k2.6` has MiMoCode validation proof for the current
   minimum-supported MiMoCode contract, but the public picker is now backed by
   the live GonkaGate model catalog rather than a hardcoded validated allowlist
@@ -96,6 +102,13 @@ change.
 - project config must not own the secret binding
 - public setup must fetch the model catalog after safe API-key intake instead
   of exposing a hardcoded model allowlist
+- model ids, display names, and context windows must never be checked in; they
+  are read from the live `/v1/models` response
+- the non-interactive default model is `data[0]` of the live response, in
+  response order; no client-side ranking, sorting, or preference heuristic
+- optional live metadata must degrade instead of failing: a missing `name`
+  falls back to the model id, a missing `description` is omitted, and a missing
+  `context_length` writes no MiMoCode `limit` block rather than a `0` limit
 - installer success must be based on effective MiMoCode config, not only file
   writes
 - raw `mimo --pure debug config` output must not be printed because `{file:...}`
@@ -212,11 +225,15 @@ results. The default public flow fetches the GonkaGate model catalog from
 ### `src/install/model-catalog.ts`
 
 Trust-boundary parser and fetch adapter for `GET /v1/models`. Keep it strict
-about response shape and redaction-safe about failures.
+about the required response shape, tolerant about optional per-model metadata,
+and redaction-safe about failures.
 
 ### `src/constants/`
 
 Package, provider, transport, path, and model-validation constants.
+`src/constants/models.ts` holds runtime model types only; model data belongs to
+the live catalog. `src/constants/model-validation.ts` is the MiMoCode workflow
+proof ledger and must never record a validation that did not happen.
 
 ### `.agents/skills/` and `.claude/skills/`
 

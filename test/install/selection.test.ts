@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { CURRENT_PROVIDER_PACKAGE } from "../../src/constants/gateway.js";
-import type { CuratedModelRegistry } from "../../src/constants/models.js";
+import type { ModelRegistry } from "../../src/constants/models.js";
 import { InstallerError } from "../../src/install/errors.js";
 import {
   selectScope,
@@ -14,11 +14,10 @@ const oneValidated = {
     adapterPackage: CURRENT_PROVIDER_PACKAGE,
     displayName: "Alpha",
     modelId: "provider/alpha",
-    recommended: true,
     transport: "chat_completions",
     validationStatus: "validated",
   },
-} as const satisfies CuratedModelRegistry;
+} as const satisfies ModelRegistry;
 
 const twoValidated = {
   alpha: oneValidated.alpha,
@@ -26,11 +25,10 @@ const twoValidated = {
     adapterPackage: CURRENT_PROVIDER_PACKAGE,
     displayName: "Beta",
     modelId: "provider/beta",
-    recommended: false,
     transport: "chat_completions",
     validationStatus: "validated",
   },
-} as const satisfies CuratedModelRegistry;
+} as const satisfies ModelRegistry;
 
 test("validated-only selection blocks candidate-only and unsupported model keys", async () => {
   const deps = createTestDeps();
@@ -41,7 +39,6 @@ test("validated-only selection blocks candidate-only and unsupported model keys"
           adapterPackage: CURRENT_PROVIDER_PACKAGE,
           displayName: "Candidate",
           modelId: "provider/candidate",
-          recommended: false,
           transport: "chat_completions",
           validationStatus: "candidate",
         },
@@ -64,7 +61,7 @@ test("validated-only selection blocks candidate-only and unsupported model keys"
   deps.cleanup();
 });
 
-test("validated-only selection supports recommended, single, prompt, and ambiguity behavior", async () => {
+test("non-interactive selection defaults to the first live catalog entry", async () => {
   const deps = createTestDeps();
   assert.equal(
     (await selectValidatedModel({ yes: true }, deps, oneValidated)).model.key,
@@ -76,23 +73,36 @@ test("validated-only selection supports recommended, single, prompt, and ambigui
     "alpha",
   );
   assert.equal(
-    (await selectValidatedModel({}, deps, twoValidated)).model.key,
+    (await selectValidatedModel({ yes: true }, deps, twoValidated)).model.key,
     "alpha",
   );
 
-  const ambiguousDeps = createTestDeps();
-  const noRecommended = {
-    alpha: { ...oneValidated.alpha, recommended: false },
-    beta: { ...twoValidated.beta, recommended: false },
-  } as const satisfies CuratedModelRegistry;
-  await assert.rejects(
-    () => selectValidatedModel({ yes: true }, ambiguousDeps, noRecommended),
-    (error) => {
-      assert.equal((error as InstallerError).code, "ambiguous_model_selection");
-      return true;
-    },
+  const reversed = {
+    beta: twoValidated.beta,
+    alpha: twoValidated.alpha,
+  } as const satisfies ModelRegistry;
+  assert.equal(
+    (await selectValidatedModel({ yes: true }, deps, reversed)).model.key,
+    "beta",
   );
   assert.equal(await selectScope(undefined, deps, true), "user");
   deps.cleanup();
-  ambiguousDeps.cleanup();
+});
+
+test("interactive picker offers live catalog order, display names, and descriptions", async () => {
+  const deps = createTestDeps();
+  const described = {
+    alpha: { ...twoValidated.alpha, displayName: "Alpha One" },
+    beta: { ...twoValidated.beta, description: "Fast beta model" },
+  } as const satisfies ModelRegistry;
+
+  assert.equal(
+    (await selectValidatedModel({}, deps, described)).model.key,
+    "alpha",
+  );
+  assert.deepEqual(deps.selectPromptLog[0]?.choices, [
+    { name: "Alpha One", value: "alpha" },
+    { description: "Fast beta model", name: "Beta", value: "beta" },
+  ]);
+  deps.cleanup();
 });

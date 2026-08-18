@@ -15,7 +15,9 @@ a hardcoded allowlist.
 3. Collect a GonkaGate API key through safe inputs only:
    `GONKAGATE_API_KEY`, masked interactive prompt, or `--api-key-stdin`.
 4. Fetch `https://api.gonkagate.com/v1/models` with Bearer auth and build the
-   setup picker from every returned model id.
+   setup picker from every returned model id, using the live `name`,
+   `description`, and `context_length` when the gateway publishes them. The
+   non-interactive default is the first model of the response.
 5. Store the secret under `~/.gonkagate/mimo-code/api-key`.
 6. Write user-level provider config for `provider.gonkagate`.
 7. Write only activation settings for project scope.
@@ -64,19 +66,15 @@ The intended managed provider shape is:
         "setCacheKey": false
       },
       "models": {
-        "moonshotai/kimi-k2.6": {
-          "name": "moonshotai/kimi-k2.6",
+        "<model-id-with-published-context>": {
+          "name": "<live catalog name>",
           "limit": {
-            "context": 0,
+            "context": "<live catalog context_length>",
             "output": 0
           }
         },
-        "minimaxai/minimax-m2.7": {
-          "name": "minimaxai/minimax-m2.7",
-          "limit": {
-            "context": 0,
-            "output": 0
-          }
+        "<model-id-without-published-context>": {
+          "name": "<model id>"
         }
       }
     }
@@ -86,7 +84,17 @@ The intended managed provider shape is:
 
 The concrete `models` object is generated from the live `/v1/models` response.
 The API model ids are also the MiMoCode model keys under
-`provider.gonkagate.models`.
+`provider.gonkagate.models`. This repository keeps no checked-in model catalog:
+ids, display names, and context windows are read from the live response on
+every run.
+
+Per-model metadata is optional on the wire, because a GonkaGate gateway may
+still return only `id`, `object`, `created`, and `owned_by`:
+
+- missing `name` falls back to the model id
+- missing `description` is omitted from the picker
+- missing `context_length` writes no `limit` block for that model, so MiMoCode
+  keeps its own default instead of being told the context window is `0`
 
 `setCacheKey` is disabled because live GonkaGate chat-completions requests
 reject the non-standard `promptCacheKey` parameter emitted by the AI SDK when

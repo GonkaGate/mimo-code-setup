@@ -1,7 +1,6 @@
 import {
-  CURATED_MODEL_REGISTRY,
   formatMimoCodeModelRef,
-  type CuratedModelRegistry,
+  type ModelRegistry,
 } from "../constants/models.js";
 import type { InstallState } from "./contracts/install-state.js";
 import { getConfigValue } from "./config-value.js";
@@ -10,7 +9,8 @@ import { deleteJsoncValue, parseJsoncDocument } from "./jsonc.js";
 export interface CleanupActivationOptions {
   currentModelKey: string;
   installState?: InstallState;
-  registry?: CuratedModelRegistry;
+  /** Live catalog for this run; absent when no catalog was fetched. */
+  registry?: ModelRegistry;
 }
 
 export function cleanupInstallerOwnedActivation(
@@ -42,8 +42,7 @@ export function isInstallerOwnedModelRef(
     return true;
   }
 
-  const registry = options.registry ?? CURATED_MODEL_REGISTRY;
-  return Object.keys(registry).some(
+  return Object.keys(options.registry ?? {}).some(
     (key) => value === formatMimoCodeModelRef(key),
   );
 }
