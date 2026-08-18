@@ -16,7 +16,6 @@ test("generated project-scope config stays commit-safe", () => {
         adapterPackage: CURRENT_PROVIDER_PACKAGE,
         displayName: "Alpha",
         modelId: "provider/alpha",
-        recommended: true,
         transport: "chat_completions",
         validationStatus: "validated",
       },

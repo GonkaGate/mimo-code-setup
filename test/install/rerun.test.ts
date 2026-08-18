@@ -3,7 +3,7 @@ import { readdirSync } from "node:fs";
 import { join } from "node:path";
 import test from "node:test";
 import { CURRENT_PROVIDER_PACKAGE } from "../../src/constants/gateway.js";
-import type { CuratedModelRegistry } from "../../src/constants/models.js";
+import type { ModelRegistry } from "../../src/constants/models.js";
 import { runInstallSession } from "../../src/install/session.js";
 import { createTestDeps } from "./test-deps.js";
 
@@ -12,7 +12,6 @@ const registry = {
     adapterPackage: CURRENT_PROVIDER_PACKAGE,
     displayName: "Alpha",
     modelId: "provider/alpha",
-    recommended: true,
     transport: "chat_completions",
     validationStatus: "validated",
   },
@@ -20,11 +19,10 @@ const registry = {
     adapterPackage: CURRENT_PROVIDER_PACKAGE,
     displayName: "Beta",
     modelId: "provider/beta",
-    recommended: false,
     transport: "chat_completions",
     validationStatus: "validated",
   },
-} as const satisfies CuratedModelRegistry;
+} as const satisfies ModelRegistry;
 
 function resolved(model: "alpha" | "beta") {
   return JSON.stringify({

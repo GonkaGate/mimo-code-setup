@@ -5,7 +5,7 @@ import {
   GONKAGATE_BASE_URL,
   MANAGED_SECRET_FILE_REF,
 } from "../../src/constants/gateway.js";
-import type { CuratedModelRegistry } from "../../src/constants/models.js";
+import type { ModelRegistry } from "../../src/constants/models.js";
 import {
   createManagedProviderConfig,
   createManagedProviderConfigPatch,
@@ -17,7 +17,6 @@ const validatedRegistry = {
     displayName: "Alpha",
     limits: { context: 10, output: 20 },
     modelId: "provider/alpha",
-    recommended: true,
     runtimeCompatibility: {
       modelHeaders: { "x-test": "1" },
       modelOptions: { temperature: 0 },
@@ -29,11 +28,10 @@ const validatedRegistry = {
     adapterPackage: CURRENT_PROVIDER_PACKAGE,
     displayName: "Beta",
     modelId: "provider/beta",
-    recommended: false,
     transport: "chat_completions",
     validationStatus: "validated",
   },
-} as const satisfies CuratedModelRegistry;
+} as const satisfies ModelRegistry;
 
 test("managed provider config writes only validated models with canonical provider options", () => {
   const empty = createManagedProviderConfig({});
@@ -47,7 +45,32 @@ test("managed provider config writes only validated models with canonical provid
   assert.deepEqual(Object.keys(config.models), ["alpha", "beta"]);
   assert.deepEqual(config.models.alpha?.limit, { context: 10, output: 20 });
   assert.deepEqual(config.models.alpha?.headers, { "x-test": "1" });
-  assert.deepEqual(config.models.beta?.limit, { context: 0, output: 0 });
+  assert.equal(config.models.alpha?.name, "Alpha");
+});
+
+test("generated model entries carry the live display name and context window", () => {
+  const config = createManagedProviderConfig({
+    "deepseek-ai/deepseek-v4-flash-0731": {
+      adapterPackage: CURRENT_PROVIDER_PACKAGE,
+      displayName: "DeepSeek V4 Flash 0731",
+      limits: { context: 400_000 },
+      modelId: "deepseek-ai/deepseek-v4-flash-0731",
+      transport: "chat_completions",
+      validationStatus: "validated",
+    },
+  });
+
+  assert.deepEqual(config.models["deepseek-ai/deepseek-v4-flash-0731"], {
+    limit: { context: 400_000, output: 0 },
+    name: "DeepSeek V4 Flash 0731",
+  });
+});
+
+test("no limit block is written when the gateway publishes no context window", () => {
+  const config = createManagedProviderConfig(validatedRegistry);
+
+  assert.equal("limit" in (config.models.beta ?? {}), false);
+  assert.deepEqual(config.models.beta, { name: "Beta" });
 });
 
 test("candidate-only registry is not exposed in generated runtime provider catalog", () => {
@@ -56,11 +79,10 @@ test("candidate-only registry is not exposed in generated runtime provider catal
       adapterPackage: CURRENT_PROVIDER_PACKAGE,
       displayName: "Candidate",
       modelId: "provider/candidate",
-      recommended: false,
       transport: "chat_completions",
       validationStatus: "candidate",
     },
-  } as const satisfies CuratedModelRegistry;
+  } as const satisfies ModelRegistry;
 
   assert.deepEqual(createManagedProviderConfig(candidateOnly).models, {});
 });
@@ -71,14 +93,13 @@ test("provider config rejects compatibility metadata that overrides canonical se
       adapterPackage: CURRENT_PROVIDER_PACKAGE,
       displayName: "Alpha",
       modelId: "provider/alpha",
-      recommended: true,
       runtimeCompatibility: {
         providerOptions: { baseURL: "https://evil.test" },
       },
       transport: "chat_completions",
       validationStatus: "validated",
     },
-  } as const satisfies CuratedModelRegistry;
+  } as const satisfies ModelRegistry;
 
   assert.throws(() => createManagedProviderConfig(invalid), /cannot override/);
   assert.deepEqual(createManagedProviderConfigPatch(validatedRegistry).path, [

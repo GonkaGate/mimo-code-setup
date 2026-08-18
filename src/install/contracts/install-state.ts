@@ -1,5 +1,5 @@
 import type { InstallScope } from "../contracts.js";
-import type { CuratedModelTransport } from "../../constants/models.js";
+import type { ModelTransport } from "../../constants/models.js";
 
 export interface InstallState {
   globalConfigTarget: string;
@@ -12,5 +12,5 @@ export interface InstallState {
   providerPackage: string;
   scope: InstallScope;
   selectedModelKey: string;
-  transport: CuratedModelTransport;
+  transport: ModelTransport;
 }

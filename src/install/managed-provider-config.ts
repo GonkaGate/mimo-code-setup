@@ -4,10 +4,10 @@ import {
   GONKAGATE_PROVIDER_ID,
   MANAGED_SECRET_FILE_REF,
 } from "../constants/gateway.js";
-import {
-  CURATED_MODEL_REGISTRY,
-  type CuratedModelDefinition,
-  type CuratedModelRegistry,
+import type {
+  ModelDefinition,
+  ModelLimits,
+  ModelRegistry,
 } from "../constants/models.js";
 
 export interface ManagedProviderConfig {
@@ -22,7 +22,7 @@ export interface ManagedProviderConfig {
 }
 
 export interface ManagedProviderModelConfig {
-  limit: {
+  limit?: {
     context: number;
     output: number;
   };
@@ -32,24 +32,22 @@ export interface ManagedProviderModelConfig {
 }
 
 export function createManagedProviderConfig(
-  registry: CuratedModelRegistry = CURATED_MODEL_REGISTRY,
+  registry: ModelRegistry,
 ): ManagedProviderConfig {
   const models: Record<string, ManagedProviderModelConfig> = {};
 
   for (const [key, model] of Object.entries(registry) as [
     string,
-    CuratedModelDefinition,
+    ModelDefinition,
   ][]) {
     if (model.validationStatus !== "validated") {
       continue;
     }
 
     assertNoCanonicalOverride(model);
+    const limit = toManagedLimit(model.limits);
     models[key] = {
-      limit: {
-        context: model.limits?.context ?? 0,
-        output: model.limits?.output ?? 0,
-      },
+      ...(limit === undefined ? {} : { limit }),
       name: model.displayName,
       ...(model.runtimeCompatibility?.modelHeaders === undefined
         ? {}
@@ -72,7 +70,30 @@ export function createManagedProviderConfig(
   };
 }
 
-function assertNoCanonicalOverride(model: CuratedModelDefinition): void {
+/**
+ * Build the MiMoCode `limit` block from what the gateway actually published.
+ *
+ * A gateway that has not shipped per-model metadata publishes no context
+ * window, so no `limit` block is written at all and MiMoCode keeps its own
+ * default. Writing `context: 0` would claim a real, wrong limit.
+ *
+ * When any limit is known, both keys are written because that is the shape
+ * proven against MiMoCode in `src/constants/model-validation.ts`.
+ */
+function toManagedLimit(
+  limits: ModelLimits | undefined,
+): { context: number; output: number } | undefined {
+  if (limits?.context === undefined && limits?.output === undefined) {
+    return undefined;
+  }
+
+  return {
+    context: limits.context ?? 0,
+    output: limits.output ?? 0,
+  };
+}
+
+function assertNoCanonicalOverride(model: ModelDefinition): void {
   const providerOptions = model.runtimeCompatibility?.providerOptions;
   if (providerOptions === undefined) {
     return;
@@ -85,9 +106,7 @@ function assertNoCanonicalOverride(model: CuratedModelDefinition): void {
   }
 }
 
-export function createManagedProviderConfigPatch(
-  registry?: CuratedModelRegistry,
-) {
+export function createManagedProviderConfigPatch(registry: ModelRegistry) {
   return {
     path: ["provider", GONKAGATE_PROVIDER_ID],
     value: createManagedProviderConfig(registry),

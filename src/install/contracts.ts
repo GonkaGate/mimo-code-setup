@@ -1,4 +1,4 @@
-import type { CuratedModelTransport } from "../constants/models.js";
+import type { ModelTransport } from "../constants/models.js";
 
 export type InstallScope = "user" | "project";
 export type InstallerStatus = "success" | "blocked" | "failed";
@@ -48,7 +48,7 @@ export interface InstallerSuccessResult {
   modelRef: `gonkagate/${string}`;
   scope: InstallScope;
   provider: "gonkagate";
-  transport: CuratedModelTransport;
+  transport: ModelTransport;
   mimoCode: MimoCodeVersionInfo;
   configTargets: ConfigTargets;
   verification: VerificationSummary;
@@ -124,7 +124,6 @@ export type InstallerErrorCode =
   | "model_catalog_empty"
   | "validated_models_unavailable"
   | "unsupported_model"
-  | "ambiguous_model_selection"
   | "unexpected_error";
 
 export interface InstallerErrorShape {

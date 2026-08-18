@@ -22,6 +22,11 @@ export interface RecordedHttpRequest {
   url: string;
 }
 
+export interface RecordedSelectPrompt {
+  choices: readonly { description?: string; name: string; value: string }[];
+  message: string;
+}
+
 export interface TestDeps extends InstallerDeps {
   cleanup(): void;
   commandLog: RecordedCommand[];
@@ -31,6 +36,7 @@ export interface TestDeps extends InstallerDeps {
   queueHttpResponse(result: HttpJsonResponse): void;
   queuePrompt(value: string): void;
   root: string;
+  selectPromptLog: RecordedSelectPrompt[];
   setCwd(path: string): void;
   setEnv(env: NodeJS.ProcessEnv): void;
   setStdin(contents: string): void;
@@ -47,6 +53,7 @@ export function createTestDeps(): TestDeps {
   const httpLog: RecordedHttpRequest[] = [];
   const passwordPromptLog: PasswordPromptOptions[] = [];
   const promptValues: string[] = [];
+  const selectPromptLog: RecordedSelectPrompt[] = [];
 
   const deps: TestDeps = {
     cleanup() {
@@ -90,7 +97,8 @@ export function createTestDeps(): TestDeps {
         passwordPromptLog.push(options ?? {});
         return promptValues.shift() ?? "";
       },
-      async select(_message, choices) {
+      async select(message, choices) {
+        selectPromptLog.push({ choices: [...choices], message });
         return choices[0]?.value ?? "";
       },
     },
@@ -105,6 +113,7 @@ export function createTestDeps(): TestDeps {
       promptValues.push(value);
     },
     root,
+    selectPromptLog,
     setCwd(path) {
       cwd = path;
     },

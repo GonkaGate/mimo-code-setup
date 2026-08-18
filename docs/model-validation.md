@@ -6,26 +6,16 @@ the MiMoCode workflow proof ledger.
 
 Current MiMoCode-validated workflow proof exists for:
 
-- `moonshotai/kimi-k2.6` - Kimi K2.6, 240K context.
+- `moonshotai/kimi-k2.6`, recorded in `src/constants/model-validation.ts`.
 
-The current public GonkaGate models page also lists:
-
-- `deepseek-ai/deepseek-v4-flash-0731` - DeepSeek V4 Flash 0731, 400K context.
-- `minimaxai/minimax-m2.7` - MiniMax M2.7, 180K context.
-- `qwen/qwen3-235b-a22b-instruct-2507-fp8` - Qwen3 235B A22B
-  Instruct 2507 FP8, 240K context.
+Which models exist, what they are called, and how large their context windows
+are is owned by the live `GET /v1/models` response. This repository keeps no
+copy of that catalog, so nothing here has to be edited when GonkaGate adds,
+renames, or retires a model. A model is named in this document because
+MiMoCode workflow proof exists for it, not because it is available.
 
 GonkaGate `/v1/models` availability is setup-catalog proof, not full MiMoCode
 workflow validation proof.
-
-`deepseek-ai/deepseek-v4-flash-0731` is the first entry of the live GonkaGate
-catalog, so `src/install/model-catalog.ts` already marks it recommended for the
-public picker and it is what a fresh `npx @gonkagate/mimo-code-setup` run
-defaults to. In the curated registry it stays `candidate` and
-`recommended: false`, because no MiMoCode workflow proof exists for it yet and
-only a `validated` entry may hold the curated recommendation. Promoting it
-inside `src/constants/models.ts` requires a real MiMoCode validation run
-recorded in `src/constants/model-validation.ts` first.
 
 Live MiMoCode validation for Kimi uses the full GonkaGate slug as the MiMoCode
 model key, so the effective model ref is
@@ -61,11 +51,14 @@ must prove:
 - docs and tests name the model as MiMoCode workflow-validated only after the
   proof exists
 
-The registry types already allow transport, adapter package, provider options,
-model options, model headers, limits, and migration metadata so MiMoCode-specific
-requirements can be added without changing the public shape later.
+The runtime model types in `src/constants/models.ts` already allow transport,
+adapter package, provider options, model options, model headers, limits, and
+migration metadata so MiMoCode-specific requirements can be added without
+changing the public shape later. Those types carry no model data; every value
+is filled in from the live catalog at setup time.
 
 Validation records are represented in `src/constants/model-validation.ts`.
-Contract tests reject any registry entry marked `validated` without a matching
-record. Additional live GonkaGate workflow proof is a gated validation activity
-and is not part of default CI.
+Contract tests check that each record is internally consistent with the
+provider package and transport this installer writes. A record may only be
+added after the proof above actually exists; live GonkaGate workflow proof is a
+gated validation activity and is not part of default CI.

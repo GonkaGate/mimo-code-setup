@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { join } from "node:path";
 import test from "node:test";
 import { CURRENT_PROVIDER_PACKAGE } from "../../src/constants/gateway.js";
-import type { CuratedModelRegistry } from "../../src/constants/models.js";
+import type { ModelRegistry } from "../../src/constants/models.js";
 import { runInstallSession } from "../../src/install/session.js";
 import { createTestDeps } from "./test-deps.js";
 
@@ -11,11 +11,10 @@ const registry = {
     adapterPackage: CURRENT_PROVIDER_PACKAGE,
     displayName: "Alpha",
     modelId: "provider/alpha",
-    recommended: true,
     transport: "chat_completions",
     validationStatus: "validated",
   },
-} as const satisfies CuratedModelRegistry;
+} as const satisfies ModelRegistry;
 
 function matchingConfig() {
   return JSON.stringify({
@@ -55,6 +54,13 @@ function matchingLiveConfig() {
       },
     },
   });
+}
+
+function getWrittenModels(contents: string): Record<string, unknown> {
+  const parsed = JSON.parse(contents) as {
+    provider: { gonkagate: { models: Record<string, unknown> } };
+  };
+  return parsed.provider.gonkagate.models;
 }
 
 function prepareDeps() {
@@ -150,13 +156,79 @@ test("install session fetches the live GonkaGate catalog and writes every return
     const globalConfig = await deps.fs.readText(
       join(configDir, "mimocode.jsonc"),
     );
+    const written = getWrittenModels(globalConfig);
 
     assert.equal(result.status, "success");
     assert.equal(result.ok, true);
     assert.equal(result.model, "moonshotai/kimi-k2.6");
-    assert.match(globalConfig, /moonshotai\/kimi-k2\.6/);
-    assert.match(globalConfig, /minimaxai\/minimax-m2\.7/);
-    assert.match(globalConfig, /qwen\/qwen3-235b-a22b-instruct-2507-fp8/);
+    assert.deepEqual(Object.keys(written), [
+      "moonshotai/kimi-k2.6",
+      "minimaxai/minimax-m2.7",
+      "qwen/qwen3-235b-a22b-instruct-2507-fp8",
+    ]);
+    assert.deepEqual(written["moonshotai/kimi-k2.6"], {
+      name: "moonshotai/kimi-k2.6",
+    });
+    assert.doesNotMatch(globalConfig, /"context"/);
+  } finally {
+    deps.cleanup();
+  }
+});
+
+test("install session carries live model name and context window into MiMoCode config", async () => {
+  const { deps, home } = prepareDeps();
+  const configDir = join(home, ".config", "mimocode");
+  queueSuccessfulLiveCommands(deps, configDir);
+  deps.queueHttpResponse({
+    body: {
+      data: [
+        {
+          context_length: 240_000,
+          created: 1_753_920_000,
+          description: "Long-context coding model.",
+          id: "moonshotai/kimi-k2.6",
+          name: "Kimi K2.6",
+          object: "model",
+          owned_by: "gonka",
+        },
+        {
+          context_length: null,
+          id: "minimaxai/minimax-m2.7",
+          object: "model",
+          owned_by: "gonka",
+        },
+        {
+          context_length: 180_000,
+          id: "qwen/qwen3-235b-a22b-instruct-2507-fp8",
+          name: "Qwen3 235B",
+          object: "model",
+          owned_by: "gonka",
+        },
+      ],
+      object: "list",
+    },
+    status: 200,
+  });
+
+  try {
+    const result = await runInstallSession({ scope: "user", yes: true }, deps);
+    const written = getWrittenModels(
+      await deps.fs.readText(join(configDir, "mimocode.jsonc")),
+    );
+
+    assert.equal(result.status, "success");
+    assert.equal(result.model, "moonshotai/kimi-k2.6");
+    assert.deepEqual(written["moonshotai/kimi-k2.6"], {
+      limit: { context: 240_000, output: 0 },
+      name: "Kimi K2.6",
+    });
+    assert.deepEqual(written["minimaxai/minimax-m2.7"], {
+      name: "minimaxai/minimax-m2.7",
+    });
+    assert.deepEqual(written["qwen/qwen3-235b-a22b-instruct-2507-fp8"], {
+      limit: { context: 180_000, output: 0 },
+      name: "Qwen3 235B",
+    });
   } finally {
     deps.cleanup();
   }

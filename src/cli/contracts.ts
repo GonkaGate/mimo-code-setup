@@ -1,4 +1,4 @@
-import type { CuratedModelRegistry } from "../constants/models.js";
+import type { ModelRegistry } from "../constants/models.js";
 import type { InstallerDeps } from "../install/deps.js";
 
 export interface CliOptions {
@@ -17,7 +17,7 @@ export interface CliRunResult {
 
 export interface CliRunOptions {
   deps?: InstallerDeps;
-  registry?: CuratedModelRegistry;
+  registry?: ModelRegistry;
   stderr?: Pick<NodeJS.WriteStream, "write">;
   stdout?: Pick<NodeJS.WriteStream, "write">;
 }

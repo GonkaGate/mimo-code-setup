@@ -9,7 +9,7 @@ import {
   CURRENT_PROVIDER_PACKAGE,
   GONKAGATE_BASE_URL,
 } from "../src/constants/gateway.js";
-import type { CuratedModelRegistry } from "../src/constants/models.js";
+import type { ModelRegistry } from "../src/constants/models.js";
 import { escapeRegExp, repoRoot } from "./contract-helpers.js";
 import { createTestDeps } from "./install/test-deps.js";
 
@@ -33,11 +33,10 @@ const validatedRegistry = {
     adapterPackage: CURRENT_PROVIDER_PACKAGE,
     displayName: "Alpha",
     modelId: "provider/alpha",
-    recommended: true,
     transport: "chat_completions",
     validationStatus: "validated",
   },
-} as const satisfies CuratedModelRegistry;
+} as const satisfies ModelRegistry;
 
 function queueCliSuccess(
   deps: ReturnType<typeof createTestDeps>,

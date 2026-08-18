@@ -1,7 +1,7 @@
 import { GONKAGATE_PROVIDER_ID } from "../constants/gateway.js";
 import {
   formatMimoCodeModelRef,
-  type CuratedModelRegistry,
+  type ModelRegistry,
 } from "../constants/models.js";
 import type { InstallScope } from "./contracts.js";
 import { applyManagedConfigValues } from "./config.js";
@@ -20,7 +20,7 @@ export interface ManagedConfigValue {
 
 export function createScopeWritePlan(input: {
   modelKey: string;
-  registry?: CuratedModelRegistry;
+  registry: ModelRegistry;
   scope: InstallScope;
 }): ScopeWritePlan {
   const modelRef = formatMimoCodeModelRef(input.modelKey);

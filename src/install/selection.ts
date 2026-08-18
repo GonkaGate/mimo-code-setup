@@ -1,7 +1,7 @@
 import {
-  type CuratedModelDefinition,
-  type CuratedModelRecord,
-  type CuratedModelRegistry,
+  type ModelDefinition,
+  type ModelRecord,
+  type ModelRegistry,
 } from "../constants/models.js";
 import type { InstallerDeps } from "./deps.js";
 import { InstallerError } from "./errors.js";
@@ -12,18 +12,22 @@ export interface ModelSelectionRequest {
 }
 
 export interface ModelSelection {
-  model: CuratedModelRecord;
+  model: ModelRecord;
 }
 
+/**
+ * Pick the setup model from the live catalog.
+ *
+ * The non-interactive default is the first model of the live `/v1/models`
+ * response, in response order. The gateway owns that order; the installer must
+ * not rank, sort, or prefer models on its own.
+ */
 export async function selectValidatedModel(
   request: ModelSelectionRequest,
   deps: InstallerDeps,
-  registry: CuratedModelRegistry,
+  registry: ModelRegistry,
 ): Promise<ModelSelection> {
   const validatedModels = getValidatedModelRecords(registry);
-  const recommendedModels = validatedModels.filter(
-    (model) => model.recommended,
-  );
 
   if (validatedModels.length === 0) {
     throw new InstallerError({
@@ -49,27 +53,16 @@ export async function selectValidatedModel(
     return { model: selected };
   }
 
-  const recommended = recommendedModels[0];
   if (request.yes === true) {
-    if (recommended !== undefined) {
-      return { model: recommended };
-    }
-
-    if (validatedModels.length === 1) {
-      return { model: validatedModels[0]! };
-    }
-
-    throw new InstallerError({
-      category: "model_registry",
-      code: "ambiguous_model_selection",
-      message:
-        "Multiple GonkaGate models are available; choose one with --model.",
-    });
+    return { model: validatedModels[0]! };
   }
 
   const selectedKey = await deps.prompts.select(
     "GonkaGate model",
     validatedModels.map((model) => ({
+      ...(model.description === undefined
+        ? {}
+        : { description: model.description }),
       name: model.displayName,
       value: model.key,
     })),
@@ -87,12 +80,10 @@ export async function selectValidatedModel(
   return { model: selected };
 }
 
-function getValidatedModelRecords(
-  registry: CuratedModelRegistry,
-): CuratedModelRecord[] {
+function getValidatedModelRecords(registry: ModelRegistry): ModelRecord[] {
   return Object.entries(registry)
     .map(([key, model]) => ({
-      ...(model as CuratedModelDefinition),
+      ...(model as ModelDefinition),
       key,
     }))
     .filter((model) => model.validationStatus === "validated");

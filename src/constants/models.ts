@@ -1,148 +1,91 @@
-export const CURATED_MODEL_TRANSPORTS = Object.freeze([
+export const MODEL_TRANSPORTS = Object.freeze([
   "chat_completions",
   "responses",
 ] as const);
 
-export type CuratedModelTransport = (typeof CURATED_MODEL_TRANSPORTS)[number];
-export type CuratedModelValidationStatus = "candidate" | "validated";
+export type ModelTransport = (typeof MODEL_TRANSPORTS)[number];
+export type ModelValidationStatus = "candidate" | "validated";
 
-export interface CuratedModelProviderOverride {
-  api?: CuratedModelTransport;
+export interface ModelProviderOverride {
+  api?: ModelTransport;
   npm?: string;
 }
 
-export interface CuratedModelCompatibility {
+export interface ModelCompatibility {
   modelHeaders?: Readonly<Record<string, string>>;
   modelOptions?: Readonly<Record<string, unknown>>;
-  modelProvider?: Readonly<CuratedModelProviderOverride>;
+  modelProvider?: Readonly<ModelProviderOverride>;
   notes?: readonly string[];
   providerOptions?: Readonly<Record<string, unknown>>;
 }
 
-export interface CuratedModelLimits {
+export interface ModelLimits {
   context?: number;
   output?: number;
 }
 
-export interface CuratedModelMigrationMetadata {
+export interface ModelMigrationMetadata {
   adapterPackage?: string;
-  transport?: CuratedModelTransport;
+  transport?: ModelTransport;
 }
 
-export interface CuratedModelDefinition {
+/**
+ * Runtime shape of one GonkaGate model.
+ *
+ * Every field except the installer-owned adapter/transport metadata comes from
+ * the live `GET /v1/models` response. This repository does not check in a model
+ * catalog, model ids, display names, or context windows.
+ */
+export interface ModelDefinition {
   adapterPackage: string;
+  description?: string;
   displayName: string;
-  limits?: CuratedModelLimits;
-  migrationMetadata?: CuratedModelMigrationMetadata;
+  limits?: ModelLimits;
+  migrationMetadata?: ModelMigrationMetadata;
   modelId: string;
-  recommended: boolean;
-  runtimeCompatibility?: CuratedModelCompatibility;
-  transport: CuratedModelTransport;
-  validationStatus: CuratedModelValidationStatus;
+  runtimeCompatibility?: ModelCompatibility;
+  transport: ModelTransport;
+  validationStatus: ModelValidationStatus;
 }
 
-export interface CuratedModelRegistry {
-  readonly [key: string]: CuratedModelDefinition;
+export interface ModelRegistry {
+  readonly [key: string]: ModelDefinition;
 }
 
-export type CuratedModelRecord<TKey extends string = string> =
-  CuratedModelDefinition & {
-    key: TKey;
-  };
+export type ModelRecord<TKey extends string = string> = ModelDefinition & {
+  key: TKey;
+};
 
-type CuratedModelKeyOf<TRegistry extends CuratedModelRegistry> = Extract<
+type ModelKeyOf<TRegistry extends ModelRegistry> = Extract<
   keyof TRegistry,
   string
 >;
 
-type CuratedModelRecordFor<
-  TRegistry extends CuratedModelRegistry,
-  TKey extends CuratedModelKeyOf<TRegistry> = CuratedModelKeyOf<TRegistry>,
+type ModelRecordFor<
+  TRegistry extends ModelRegistry,
+  TKey extends ModelKeyOf<TRegistry> = ModelKeyOf<TRegistry>,
 > = TRegistry[TKey] & {
   key: TKey;
 };
 
-type ValidatedCuratedModelRecordFor<
-  TRegistry extends CuratedModelRegistry,
-  TKey extends CuratedModelKeyOf<TRegistry> = CuratedModelKeyOf<TRegistry>,
-> = Extract<
-  CuratedModelRecordFor<TRegistry, TKey>,
-  { validationStatus: "validated" }
->;
+type ValidatedModelRecordFor<
+  TRegistry extends ModelRegistry,
+  TKey extends ModelKeyOf<TRegistry> = ModelKeyOf<TRegistry>,
+> = Extract<ModelRecordFor<TRegistry, TKey>, { validationStatus: "validated" }>;
 
-type RecommendedValidatedCuratedModelRecordFor<
-  TRegistry extends CuratedModelRegistry,
-  TKey extends CuratedModelKeyOf<TRegistry> = CuratedModelKeyOf<TRegistry>,
-> = Extract<
-  ValidatedCuratedModelRecordFor<TRegistry, TKey>,
-  { recommended: true }
->;
-
-export interface CuratedModelIndex<
-  TRegistry extends CuratedModelRegistry = CuratedModelRegistry,
-> {
-  modelKeys: readonly CuratedModelKeyOf<TRegistry>[];
-  models: readonly CuratedModelRecordFor<TRegistry>[];
-  recommendedValidatedModel:
-    | RecommendedValidatedCuratedModelRecordFor<TRegistry>
-    | undefined;
-  validatedModelKeys: readonly ValidatedCuratedModelRecordFor<TRegistry>["key"][];
-  validatedModels: readonly ValidatedCuratedModelRecordFor<TRegistry>[];
+export interface ModelIndex<TRegistry extends ModelRegistry = ModelRegistry> {
+  modelKeys: readonly ModelKeyOf<TRegistry>[];
+  models: readonly ModelRecordFor<TRegistry>[];
+  validatedModelKeys: readonly ValidatedModelRecordFor<TRegistry>["key"][];
+  validatedModels: readonly ValidatedModelRecordFor<TRegistry>[];
 }
 
 export type MimoCodeModelRef<TKey extends string = string> =
   `gonkagate/${TKey}`;
 
-export const CURATED_MODEL_REGISTRY = Object.freeze({
-  "deepseek-ai/deepseek-v4-flash-0731": {
-    adapterPackage: "@ai-sdk/openai-compatible",
-    displayName: "DeepSeek V4 Flash 0731",
-    limits: {
-      context: 400_000,
-    },
-    modelId: "deepseek-ai/deepseek-v4-flash-0731",
-    recommended: false,
-    transport: "chat_completions",
-    validationStatus: "candidate",
-  },
-  "moonshotai/kimi-k2.6": {
-    adapterPackage: "@ai-sdk/openai-compatible",
-    displayName: "Kimi K2.6",
-    limits: {
-      context: 262_000,
-    },
-    modelId: "moonshotai/kimi-k2.6",
-    recommended: true,
-    transport: "chat_completions",
-    validationStatus: "validated",
-  },
-  "minimaxai/minimax-m2.7": {
-    adapterPackage: "@ai-sdk/openai-compatible",
-    displayName: "MiniMax M2.7",
-    limits: {
-      context: 205_000,
-    },
-    modelId: "minimaxai/minimax-m2.7",
-    recommended: false,
-    transport: "chat_completions",
-    validationStatus: "candidate",
-  },
-  "qwen/qwen3-235b-a22b-instruct-2507-fp8": {
-    adapterPackage: "@ai-sdk/openai-compatible",
-    displayName: "Qwen3 235B A22B Instruct 2507 FP8",
-    limits: {
-      context: 262_000,
-    },
-    modelId: "qwen/qwen3-235b-a22b-instruct-2507-fp8",
-    recommended: false,
-    transport: "chat_completions",
-    validationStatus: "candidate",
-  },
-} as const satisfies CuratedModelRegistry);
-
-function toCuratedModelRecord<
+function toModelRecord<
   TKey extends string,
-  TDefinition extends CuratedModelDefinition,
+  TDefinition extends ModelDefinition,
 >(key: TKey, definition: TDefinition): TDefinition & { key: TKey } {
   return {
     ...definition,
@@ -151,34 +94,36 @@ function toCuratedModelRecord<
 }
 
 export function isValidatedModel<
-  TModel extends { validationStatus: CuratedModelValidationStatus },
+  TModel extends { validationStatus: ModelValidationStatus },
 >(model: TModel): model is Extract<TModel, { validationStatus: "validated" }> {
   return model.validationStatus === "validated";
 }
 
-export function isRecommendedCuratedModel<
-  TModel extends { recommended: boolean },
->(model: TModel): model is Extract<TModel, { recommended: true }> {
-  return model.recommended;
+export function isModelTransport(value: unknown): value is ModelTransport {
+  return (
+    typeof value === "string" &&
+    MODEL_TRANSPORTS.includes(value as ModelTransport)
+  );
 }
 
-export function createCuratedModelIndex<TRegistry extends CuratedModelRegistry>(
+/**
+ * Index a registry while preserving live catalog order. Order is meaningful:
+ * the first entry returned by `GET /v1/models` is the setup default.
+ */
+export function createModelIndex<TRegistry extends ModelRegistry>(
   registry: TRegistry,
-): CuratedModelIndex<TRegistry> {
-  type RegistryKey = CuratedModelKeyOf<TRegistry>;
-  type RegistryModel = CuratedModelRecordFor<TRegistry>;
-  type ValidatedRegistryModel = ValidatedCuratedModelRecordFor<TRegistry>;
-  type RecommendedValidatedRegistryModel =
-    RecommendedValidatedCuratedModelRecordFor<TRegistry>;
+): ModelIndex<TRegistry> {
+  type RegistryKey = ModelKeyOf<TRegistry>;
+  type RegistryModel = ModelRecordFor<TRegistry>;
+  type ValidatedRegistryModel = ValidatedModelRecordFor<TRegistry>;
 
   const modelKeys = Object.keys(registry) as RegistryKey[];
   const models: RegistryModel[] = [];
   const validatedModels: ValidatedRegistryModel[] = [];
   const validatedModelKeys: ValidatedRegistryModel["key"][] = [];
-  const recommendedValidatedModels: RecommendedValidatedRegistryModel[] = [];
 
   for (const key of modelKeys) {
-    const model = toCuratedModelRecord(key, registry[key]);
+    const model = toModelRecord(key, registry[key]);
     models.push(model);
 
     if (!isValidatedModel(model)) {
@@ -187,85 +132,14 @@ export function createCuratedModelIndex<TRegistry extends CuratedModelRegistry>(
 
     validatedModels.push(model);
     validatedModelKeys.push(model.key);
-
-    if (isRecommendedCuratedModel(model)) {
-      recommendedValidatedModels.push(model);
-    }
-  }
-
-  if (recommendedValidatedModels.length > 1) {
-    throw new Error(
-      "Curated model registry must not expose more than one recommended validated model.",
-    );
   }
 
   return {
     modelKeys: Object.freeze(modelKeys),
     models: Object.freeze(models),
-    recommendedValidatedModel: recommendedValidatedModels[0],
     validatedModelKeys: Object.freeze(validatedModelKeys),
     validatedModels: Object.freeze(validatedModels),
   };
-}
-
-type DefaultCuratedModelRegistry = typeof CURATED_MODEL_REGISTRY;
-
-export type CuratedModelKey = CuratedModelKeyOf<DefaultCuratedModelRegistry>;
-export type CuratedModel = CuratedModelRecordFor<DefaultCuratedModelRegistry>;
-export type CuratedModelByKey<TKey extends CuratedModelKey> =
-  CuratedModelRecordFor<DefaultCuratedModelRegistry, TKey>;
-export type ValidatedCuratedModel =
-  ValidatedCuratedModelRecordFor<DefaultCuratedModelRegistry>;
-export type RecommendedValidatedCuratedModel =
-  RecommendedValidatedCuratedModelRecordFor<DefaultCuratedModelRegistry>;
-
-const DEFAULT_CURATED_MODEL_INDEX = createCuratedModelIndex(
-  CURATED_MODEL_REGISTRY,
-);
-
-export const SUPPORTED_MODELS: readonly CuratedModel[] =
-  DEFAULT_CURATED_MODEL_INDEX.models;
-
-export const SUPPORTED_MODEL_KEYS: readonly CuratedModelKey[] =
-  DEFAULT_CURATED_MODEL_INDEX.modelKeys;
-
-export function isCuratedModelKey(key: string): key is CuratedModelKey {
-  return key in CURATED_MODEL_REGISTRY;
-}
-
-export function isCuratedModelTransport(
-  value: unknown,
-): value is CuratedModelTransport {
-  return (
-    typeof value === "string" &&
-    CURATED_MODEL_TRANSPORTS.includes(value as CuratedModelTransport)
-  );
-}
-
-export function getCuratedModelByKey<TKey extends CuratedModelKey>(
-  key: TKey,
-): CuratedModelByKey<TKey>;
-export function getCuratedModelByKey(key: string): CuratedModel | undefined;
-export function getCuratedModelByKey(key: string): CuratedModel | undefined {
-  if (!isCuratedModelKey(key)) {
-    return undefined;
-  }
-
-  return toCuratedModelRecord(key, CURATED_MODEL_REGISTRY[key]);
-}
-
-export function getValidatedModels(): readonly ValidatedCuratedModel[] {
-  return DEFAULT_CURATED_MODEL_INDEX.validatedModels;
-}
-
-export function getValidatedModelKeys(): readonly ValidatedCuratedModel["key"][] {
-  return DEFAULT_CURATED_MODEL_INDEX.validatedModelKeys;
-}
-
-export function getRecommendedValidatedModel():
-  | RecommendedValidatedCuratedModel
-  | undefined {
-  return DEFAULT_CURATED_MODEL_INDEX.recommendedValidatedModel;
 }
 
 export function formatMimoCodeModelRef<TKey extends string>(

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { CURRENT_PROVIDER_PACKAGE } from "../../src/constants/gateway.js";
-import type { CuratedModelRegistry } from "../../src/constants/models.js";
+import type { ModelRegistry } from "../../src/constants/models.js";
 import { getConfigValue } from "../../src/install/config-value.js";
 import { parseJsoncDocument } from "../../src/install/jsonc.js";
 import {
@@ -14,11 +14,10 @@ const registry = {
     adapterPackage: CURRENT_PROVIDER_PACKAGE,
     displayName: "Alpha",
     modelId: "provider/alpha",
-    recommended: true,
     transport: "chat_completions",
     validationStatus: "validated",
   },
-} as const satisfies CuratedModelRegistry;
+} as const satisfies ModelRegistry;
 
 test("user scope writes provider and activation to global config only", () => {
   const plan = createScopeWritePlan({
@@ -70,11 +69,10 @@ test("candidate-only registry writes no public provider model catalog entries", 
       adapterPackage: CURRENT_PROVIDER_PACKAGE,
       displayName: "Candidate",
       modelId: "provider/candidate",
-      recommended: false,
       transport: "chat_completions",
       validationStatus: "candidate",
     },
-  } as const satisfies CuratedModelRegistry;
+  } as const satisfies ModelRegistry;
   const plan = createScopeWritePlan({
     modelKey: "candidate",
     registry: candidateOnly,
