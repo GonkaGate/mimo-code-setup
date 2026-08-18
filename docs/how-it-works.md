@@ -64,6 +64,13 @@ The intended managed provider shape is:
         "setCacheKey": false
       },
       "models": {
+        "deepseek-ai/deepseek-v4-flash-0731": {
+          "name": "deepseek-ai/deepseek-v4-flash-0731",
+          "limit": {
+            "context": 0,
+            "output": 0
+          }
+        },
         "moonshotai/kimi-k2.6": {
           "name": "moonshotai/kimi-k2.6",
           "limit": {

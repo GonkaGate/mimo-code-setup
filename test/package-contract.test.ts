@@ -120,26 +120,38 @@ test("constants pin the planned GonkaGate MiMoCode provider contract", () => {
 
 test("curated model registry is present but not falsely validated", () => {
   assert.deepEqual(SUPPORTED_MODEL_KEYS, [
+    "deepseek-ai/deepseek-v4-flash-0731",
     "moonshotai/kimi-k2.6",
     "minimaxai/minimax-m2.7",
     "qwen/qwen3-235b-a22b-instruct-2507-fp8",
   ]);
   assert.equal(getValidatedModels().length, 1);
-  assert.equal(getRecommendedValidatedModel()?.key, "moonshotai/kimi-k2.6");
+  assert.equal(getValidatedModels()[0]?.key, "moonshotai/kimi-k2.6");
+  assert.equal(getRecommendedValidatedModel(), undefined);
   assert.equal(CONTRACT_METADATA.curatedRegistryPublished, true);
 
   for (const [key, model] of Object.entries(CURATED_MODEL_REGISTRY)) {
     assert.equal(model.adapterPackage, "@ai-sdk/openai-compatible");
     assert.equal(model.transport, "chat_completions");
-    if (key === "moonshotai/kimi-k2.6") {
-      assert.equal(model.validationStatus, "validated");
-      assert.equal(model.recommended, true);
-    } else {
-      assert.equal(model.validationStatus, "candidate");
-      assert.equal(model.recommended, false);
-    }
+    assert.equal(
+      model.validationStatus,
+      key === "moonshotai/kimi-k2.6" ? "validated" : "candidate",
+    );
+    assert.equal(
+      model.recommended,
+      key === "deepseek-ai/deepseek-v4-flash-0731",
+    );
   }
 
+  assert.equal(
+    CURATED_MODEL_REGISTRY["deepseek-ai/deepseek-v4-flash-0731"].modelId,
+    "deepseek-ai/deepseek-v4-flash-0731",
+  );
+  assert.equal(
+    CURATED_MODEL_REGISTRY["deepseek-ai/deepseek-v4-flash-0731"].limits
+      ?.context,
+    400_000,
+  );
   assert.equal(
     CURATED_MODEL_REGISTRY["moonshotai/kimi-k2.6"].modelId,
     "moonshotai/kimi-k2.6",

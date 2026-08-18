@@ -10,12 +10,18 @@ Current MiMoCode-validated workflow proof exists for:
 
 The current public GonkaGate models page also lists:
 
+- `deepseek-ai/deepseek-v4-flash-0731` - DeepSeek V4 Flash 0731, 400K context.
 - `minimaxai/minimax-m2.7` - MiniMax M2.7, 180K context.
 - `qwen/qwen3-235b-a22b-instruct-2507-fp8` - Qwen3 235B A22B
   Instruct 2507 FP8, 240K context.
 
 GonkaGate `/v1/models` availability is setup-catalog proof, not full MiMoCode
 workflow validation proof.
+
+`deepseek-ai/deepseek-v4-flash-0731` is the recommended curated entry in
+`src/constants/models.ts`, so it is the model the curated registry points new
+setups at. It has no MiMoCode workflow proof yet, so it stays `candidate` and
+the curated registry currently exposes no recommended validated model.
 
 Live MiMoCode validation for Kimi uses the full GonkaGate slug as the MiMoCode
 model key, so the effective model ref is

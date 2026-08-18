@@ -94,6 +94,17 @@ export type MimoCodeModelRef<TKey extends string = string> =
   `gonkagate/${TKey}`;
 
 export const CURATED_MODEL_REGISTRY = Object.freeze({
+  "deepseek-ai/deepseek-v4-flash-0731": {
+    adapterPackage: "@ai-sdk/openai-compatible",
+    displayName: "DeepSeek V4 Flash 0731",
+    limits: {
+      context: 400_000,
+    },
+    modelId: "deepseek-ai/deepseek-v4-flash-0731",
+    recommended: true,
+    transport: "chat_completions",
+    validationStatus: "candidate",
+  },
   "moonshotai/kimi-k2.6": {
     adapterPackage: "@ai-sdk/openai-compatible",
     displayName: "Kimi K2.6",
@@ -101,7 +112,7 @@ export const CURATED_MODEL_REGISTRY = Object.freeze({
       context: 262_000,
     },
     modelId: "moonshotai/kimi-k2.6",
-    recommended: true,
+    recommended: false,
     transport: "chat_completions",
     validationStatus: "validated",
   },
