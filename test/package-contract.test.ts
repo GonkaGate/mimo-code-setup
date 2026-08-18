@@ -127,7 +127,7 @@ test("curated model registry is present but not falsely validated", () => {
   ]);
   assert.equal(getValidatedModels().length, 1);
   assert.equal(getValidatedModels()[0]?.key, "moonshotai/kimi-k2.6");
-  assert.equal(getRecommendedValidatedModel(), undefined);
+  assert.equal(getRecommendedValidatedModel()?.key, "moonshotai/kimi-k2.6");
   assert.equal(CONTRACT_METADATA.curatedRegistryPublished, true);
 
   for (const [key, model] of Object.entries(CURATED_MODEL_REGISTRY)) {
@@ -137,10 +137,7 @@ test("curated model registry is present but not falsely validated", () => {
       model.validationStatus,
       key === "moonshotai/kimi-k2.6" ? "validated" : "candidate",
     );
-    assert.equal(
-      model.recommended,
-      key === "deepseek-ai/deepseek-v4-flash-0731",
-    );
+    assert.equal(model.recommended, key === "moonshotai/kimi-k2.6");
   }
 
   assert.equal(

@@ -18,10 +18,14 @@ The current public GonkaGate models page also lists:
 GonkaGate `/v1/models` availability is setup-catalog proof, not full MiMoCode
 workflow validation proof.
 
-`deepseek-ai/deepseek-v4-flash-0731` is the recommended curated entry in
-`src/constants/models.ts`, so it is the model the curated registry points new
-setups at. It has no MiMoCode workflow proof yet, so it stays `candidate` and
-the curated registry currently exposes no recommended validated model.
+`deepseek-ai/deepseek-v4-flash-0731` is the first entry of the live GonkaGate
+catalog, so `src/install/model-catalog.ts` already marks it recommended for the
+public picker and it is what a fresh `npx @gonkagate/mimo-code-setup` run
+defaults to. In the curated registry it stays `candidate` and
+`recommended: false`, because no MiMoCode workflow proof exists for it yet and
+only a `validated` entry may hold the curated recommendation. Promoting it
+inside `src/constants/models.ts` requires a real MiMoCode validation run
+recorded in `src/constants/model-validation.ts` first.
 
 Live MiMoCode validation for Kimi uses the full GonkaGate slug as the MiMoCode
 model key, so the effective model ref is
